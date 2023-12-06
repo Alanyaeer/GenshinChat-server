@@ -1,0 +1,46 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/genshin_chat?characterEncoding=utf-8&useSSL=false
+    username: root
+    password:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  http:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  redis:
+    host: 192.168.139.130
+    port: 6379
+    password: 114514
+    database: 0
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存数据的过期时间
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+knife4j:
+  enable: true
+  openapi:
+    title: 聊天管理接口
+    description: "聊天管理接口"
+    email: 114514@xbz
+    concat: wjh
+    url: http://vvvv.com
+    version: v1.0.0
+    group:
+      default:
+        group-name: default
+        api-rule: package
+        api-rule-resources:
+          - com.homework.genshinchat.controller
