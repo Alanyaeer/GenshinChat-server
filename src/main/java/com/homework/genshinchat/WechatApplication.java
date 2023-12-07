@@ -15,7 +15,6 @@ import org.springframework.context.annotation.ComponentScan;
 @Slf4j
 @SpringBootApplication
 @MapperScan("com.homework.genshinchat.mapper")
-
 public class WechatApplication {
 
     public static void main(String[] args) {

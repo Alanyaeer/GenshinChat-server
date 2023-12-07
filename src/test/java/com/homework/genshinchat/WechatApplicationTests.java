@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -34,6 +35,8 @@ class WechatApplicationTests {
     private FriendService friendService;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Test
     void insertPerson() {
         User user = new User();
@@ -85,5 +88,14 @@ class WechatApplicationTests {
 //        }
 //        log.info("{}, {}", ids, friendIds);
     }
-
+    @Test
+    void testforTrim(){
+        for(char ch = 'a'; ch <= 'g'; ++ch){
+            String key = "";
+            key += ch;
+            redisTemplate.opsForList().rightPush(key, "111");
+        }
+        redisTemplate.delete("a");
+//        redisTemplate.opsForList().trim("a", 0, 2);
+    }
 }

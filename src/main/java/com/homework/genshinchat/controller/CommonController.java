@@ -42,7 +42,7 @@ import static com.homework.genshinchat.constants.RedisConstants.FILE_SIZE_KEY;
 public class CommonController {
     @Autowired
     private MessageService messageService;
-    private String basepath ="/opt/fileandpicture/";
+    private static final String basepath ="D:\\fileandpicture\\";
     private Map<String, Integer> uploadcache= new HashMap<>();
     private Map<String, Integer> uploadEnable = new HashMap<>();
     private Map<String, Integer> downloadcache = new HashMap<>();

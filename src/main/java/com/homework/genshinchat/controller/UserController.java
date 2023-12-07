@@ -1,13 +1,17 @@
 package com.homework.genshinchat.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.homework.genshinchat.common.R;
+import com.homework.genshinchat.entity.Friend;
 import com.homework.genshinchat.entity.User;
 import com.homework.genshinchat.entity.UserInfo;
+import com.homework.genshinchat.mapper.FriendMapper;
 import com.homework.genshinchat.mapper.UserInfoMapper;
+import com.homework.genshinchat.service.FriendService;
 import com.homework.genshinchat.service.UserInfoService;
 import com.homework.genshinchat.service.UserService;
 import com.homework.genshinchat.utils.LivePerson;
@@ -23,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+
+import static com.homework.genshinchat.constants.RedisConstants.FRIEND_PERSON_KEY;
 import static com.homework.genshinchat.constants.RedisConstants.USER_INFO_KEY;
 
 
@@ -39,20 +45,21 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserInfoService userInfoService;
-
+    @Autowired
+    private FriendService friendService;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
     private UserInfoMapper userInfoMapper;
     @PostConstruct
     private void init() {
-//        log.info("用户信息预热");
-////        LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();
-////        List<UserInfo> userInfoList = userInfoMapper.selectList(wrapper);
-////        userInfoList.forEach(e->{
-////            redisTemplate.opsForHash().put(USER_INFO_KEY, e.getUserid(), JSON.toJSONString(e));
-////        });
-//        log.info("用户信息预热完毕");
+        log.info("用户信息预热");
+        LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();
+        List<UserInfo> userInfoList = userInfoMapper.selectList(wrapper);
+        userInfoList.forEach(e->{
+            redisTemplate.opsForHash().put(USER_INFO_KEY, e.getUserid(), JSON.toJSONString(e));
+        });
+        log.info("用户信息预热完毕");
 
     }
     /**
@@ -68,6 +75,14 @@ public class UserController {
         // 判断 数据库里面是否存在id
         if(userService.findPerson(user)){
             log.info("成功");
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUserid(user.getId());
+            userInfoService.save(userInfo);
+            Friend friend = new Friend();
+            friend.setId(user.getId());
+            friend.setFriendId(user.getId());
+            redisTemplate.opsForList().rightPush(FRIEND_PERSON_KEY + ":"+ user.getId(), JSON.toJSONString(friend));
+            friendService.save(friend);
             return R.success(1);
         }
         else {
@@ -90,6 +105,8 @@ public class UserController {
         String password = map.get("password").toString();
         if(userService.checkpassword(id, password)){
             LivePerson.inLivePerson(id);
+            // 删除所有缓存，重新获取。
+            redisTemplate.delete(FRIEND_PERSON_KEY + ":"+ id);
             // 没有找到 id 对应的 userInfo 对象
             return R.success(1);
         }
@@ -106,11 +123,20 @@ public class UserController {
     public R<UserInfo> getuserInfo (@RequestBody Map map){
         String id = map.get("id").toString();
         String itemtemp = (String) redisTemplate.opsForHash().get(USER_INFO_KEY, id);
-        UserInfo redisData = JSON.parseObject(itemtemp, UserInfo.class);
-        if(redisData != null) return R.success(redisData);
+        log.info("获取的用户json为:{}", itemtemp);
+        if(StrUtil.isBlank(itemtemp) == false){
+            UserInfo redisData = JSON.parseObject(itemtemp, UserInfo.class);
+            return R.success(redisData);
+        }
         UserInfo userInfo = userInfoService.getUserInfo(id);
-        redisTemplate.opsForHash().put(USER_INFO_KEY, id, JSON.toJSONString(userInfo));
-        return R.success(userInfo);
+        log.info(String.valueOf(userInfo));
+        if(userInfo != null){
+            redisTemplate.opsForHash().put(USER_INFO_KEY, id, JSON.toJSONString(userInfo));
+
+        }
+        UserInfo info = new UserInfo();
+        info.setUserid(id);
+        return R.success(info);
     }
     /**
      * @Author 吴国烨
@@ -126,10 +152,10 @@ public class UserController {
         new Thread(()->{
             if(userInfoService.saveUserInfo(userInfo) == false){
                 userInfoService.save(userInfo);
-                redisTemplate.opsForHash().put(USER_INFO_KEY, userInfo.getUserid(), userInfo);
 
             }
         }).start();
+        redisTemplate.opsForHash().put(USER_INFO_KEY, userInfo.getUserid(), JSON.toJSONString(userInfo));
 
         return R.success(1);
     }

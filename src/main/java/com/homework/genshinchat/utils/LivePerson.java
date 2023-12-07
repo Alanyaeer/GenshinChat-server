@@ -27,7 +27,6 @@ public class LivePerson {
     }
     public static void inLivePerson(String id){
 //        System.out.println(liveList.containsKey(id) + "  " + id);
-        log.info("添加id为：{}的用户", id);
 
         if(liveList.containsKey(id) == false)
             liveList.put(id, true);

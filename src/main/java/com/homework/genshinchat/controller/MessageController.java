@@ -69,7 +69,7 @@ public class MessageController {
         String curid = map.get("id").toString();
         List<Friend> friendList = null;
         List<String> stringList = redisTemplate.opsForList().range(FRIEND_PERSON_KEY + ":" + curid, 0, 30);
-
+        LivePerson.inLivePerson(curid);
         if(CollectionUtil.isEmpty(stringList) == false){
             List<Friend> friendListinner = stringList.stream().map((e) -> {
                 Friend friendDto = JSON.parseObject(e, Friend.class);
@@ -79,9 +79,12 @@ public class MessageController {
         }else{
             friendList = friendService.findAllFriend(map.get("id").toString());
             List<String> list = friendList.stream().map((e) -> {
+                e.setCreateTime(null);
+                e.setUpdateTime(null);
                 String listitem = JSON.toJSONString(e);
                 return listitem;
             }).collect(Collectors.toList());
+            if(CollectionUtil.isEmpty(list) == false)
             redisTemplate.opsForList().rightPushAll(FRIEND_PERSON_KEY + ":" + curid, list);
         }
         //TODO 获取所有好友, 同时在查询过程中判断用户是否在线 （从User表中查询用户的status）
@@ -89,8 +92,11 @@ public class MessageController {
         friendList.forEach(friend -> {
             String id = friend.getFriendId();
             String itemtemp = (String)redisTemplate.opsForHash().get(USER_INFO_KEY, id);
-            UserInfo redisData = JSON.parseObject(itemtemp, UserInfo.class);
-            if(redisData != null) userInfoList.add(redisData);
+            UserInfo redisData = null;
+            if(StrUtil.isBlank(itemtemp) == false){
+                 redisData = JSON.parseObject(itemtemp, UserInfo.class);
+                userInfoList.add(redisData);
+            }
             else{
                 UserInfo item = userInfoService.findid(id);
                 redisTemplate.opsForHash().put(USER_INFO_KEY, id, JSON.toJSONString(item));
@@ -137,7 +143,6 @@ public class MessageController {
             }).collect(Collectors.toList());
             return R.success(messageList);
         }
-//        String s = redisTemplate.opsForValue().get(CHATLIST_PERSON_KEY + messageDto.getMyId() + ":" + messageDto.getFriendId());
 
         List<Message> messageList = messageService.getlistById(messageDto);
         if(messageList == null) return R.error("快去和好友聊天吧!!!");

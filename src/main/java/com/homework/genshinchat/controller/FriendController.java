@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.homework.genshinchat.common.R;
 import com.homework.genshinchat.dto.FriendDto;
 import com.homework.genshinchat.entity.Friend;
@@ -131,7 +132,7 @@ public class FriendController {
 
         if(friendService.issue(friend)){
             CACHE_REBUILD_EXECUTOR.execute(()->{
-                redisTemplate.opsForList().rightPush(FRIEND_PERSON_KEY + ":"+friendId, JSON.toJSONString(friend));
+//                redisTemplate.opsForList().rightPush(FRIEND_PERSON_KEY + ":"+friendId, JSON.toJSONString(myId));
                 redisTemplate.opsForList().rightPush(FRIEND_PERSON_KEY + ":"+myId, JSON.toJSONString(friend));
                 friendService.save(friend);
             });
@@ -150,14 +151,10 @@ public class FriendController {
     @ApiOperation( "删除好友")
 
     public R<Integer> deleteFriend(@RequestBody Friend friend){
-        String friendId = friend.getFriendId();
         String myId = friend.getId();
-        CACHE_REBUILD_EXECUTOR.submit(()->{
-            boolean issue = friendService.issue(friend);
-            if(issue) return ;
-            redisTemplate.opsForList().remove(FRIEND_PERSON_KEY + ":"+friendId, 0, redisTemplate.opsForList().size(FRIEND_PERSON_KEY + ":"+friendId));
-            redisTemplate.opsForList().remove(FRIEND_PERSON_KEY + ":"+myId, 0, redisTemplate.opsForList().size(FRIEND_PERSON_KEY + ":"+myId));
+        CACHE_REBUILD_EXECUTOR.execute(()->{
             friendService.deleteById(friend);
+            redisTemplate.opsForList().remove(FRIEND_PERSON_KEY + ":"+myId, 0, JSON.toJSONString(friend));
         });
         return R.success(1);
     }
