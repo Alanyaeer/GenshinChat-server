@@ -66,10 +66,10 @@ public class FriendController {
 
     @PostConstruct
     private void init(){
-        List<FriendDto> list = FriendList();
-        log.info("数据预热");
-        client.setWithLogicalExpire(FRIEND_ALL_KEY, list, FRIEND_ALL_TTL, TimeUnit.SECONDS);
-        log.info("预热完毕");
+//        List<FriendDto> list = FriendList();
+//        log.info("数据预热");
+//        client.setWithLogicalExpire(FRIEND_ALL_KEY, list, FRIEND_ALL_TTL, TimeUnit.SECONDS);
+//        log.info("预热完毕");
     }
     public List<FriendDto> FriendList() {
         List<User> userList = userService.findAllPerson();
@@ -152,9 +152,12 @@ public class FriendController {
 
     public R<Integer> deleteFriend(@RequestBody Friend friend){
         String myId = friend.getId();
+        String friendId = friend.getFriendId();
         CACHE_REBUILD_EXECUTOR.execute(()->{
             friendService.deleteById(friend);
             redisTemplate.opsForList().remove(FRIEND_PERSON_KEY + ":"+myId, 0, JSON.toJSONString(friend));
+            redisTemplate.opsForList().remove( FRIEND_PERSON_KEY + ":"+friendId, 0, JSON.toJSONString(friend));
+//            redisTemplate.opsForList(
         });
         return R.success(1);
     }

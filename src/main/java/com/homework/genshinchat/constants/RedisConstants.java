@@ -13,6 +13,4 @@ public class RedisConstants {
     public static final Long FRIEND_ALL_TTL = 30L;
     public static final String USER_INFO_KEY = "user:info";
     public static final Long USER_INFO_TTL = 60L;
-
-//    public static final String
 }

@@ -10,6 +10,11 @@ import com.homework.genshinchat.service.MessageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -42,6 +47,8 @@ import static com.homework.genshinchat.constants.RedisConstants.FILE_SIZE_KEY;
 public class CommonController {
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private RestHighLevelClient client;
     private static final String basepath ="D:\\fileandpicture\\";
     private Map<String, Integer> uploadcache= new HashMap<>();
     private Map<String, Integer> uploadEnable = new HashMap<>();
@@ -75,17 +82,33 @@ public class CommonController {
     public R<String> saveMessage(@RequestBody Message message) throws IOException {
 
         CACHE_REBUILD_EXECUTOR.submit(()->{
-
             String myId = message.getMyId();
             String friendId = message.getFriendId();
             if(message.getChatType() == 1 && message.getImgType() == 2){
                 message.setMsg("");
             }
-
+            log.info(message.toString());
             messageService.save(message);
             redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY + myId + ":" + friendId , JSON.toJSONString(message));
+            IndexRequest request = new IndexRequest("message").id(message.getId().toString());
+            request.source(JSON.toJSONString(message), XContentType.JSON);
+            try {
+                if(message.getId().equals(message.getUid()))
+                    client.index(request, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             message.setMyId(friendId);
             message.setFriendId(myId);
+            message.setId(message.getId() + 1);
+            IndexRequest request1 = new IndexRequest("message").id(message.getId().toString());
+            request1.source(JSON.toJSONString(message), XContentType.JSON);
+            try {
+                if(message.getId().equals(message.getUid()))
+                client.index(request1, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY +friendId + ":" + myId  , JSON.toJSONString(message));
             messageService.save(message);
 

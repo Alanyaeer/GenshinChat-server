@@ -1,5 +1,7 @@
 package com.homework.genshinchat.service.Impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -11,11 +13,21 @@ import com.homework.genshinchat.mapper.FriendMapper;
 import com.homework.genshinchat.mapper.MessageMapper;
 import com.homework.genshinchat.service.FriendService;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
+
+import static com.homework.genshinchat.constants.RedisConstants.CHATLIST_PERSON_KEY;
 
 /**
  * @author 吴嘉豪
@@ -28,6 +40,10 @@ public class FriendServiceImpl extends ServiceImpl<FriendMapper, Friend> impleme
     private FriendMapper friendMapper;
     @Autowired
     private MessageMapper messageMapper;
+    @Autowired
+    private RestHighLevelClient client;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Override
     public Friend findById(String id) {
         Friend friend = friendMapper.selectById(id);
@@ -58,6 +74,21 @@ public class FriendServiceImpl extends ServiceImpl<FriendMapper, Friend> impleme
         LambdaQueryWrapper<Message> WrapperMessage2 = new LambdaQueryWrapper<>();
         WrapperMessage2.eq(Message::getMyId, friendId);
         WrapperMessage2.eq(Message::getFriendId, id);
+        BulkRequest request = new BulkRequest();
+        List<Message> messageList = messageMapper.selectList(WrapperMessage1);
+        messageList.addAll(messageMapper.selectList(WrapperMessage2));
+        redisTemplate.delete(CHATLIST_PERSON_KEY +friendId + ":" + id);
+        redisTemplate.delete(CHATLIST_PERSON_KEY +id + ":" +friendId);
+
+        for (Message message : messageList) {
+            request.add(new DeleteRequest().index("message").id(message.getId().toString()));
+        }
+        try {
+            if(CollectionUtil.isEmpty(messageList) == false)
+            client.bulk(request,RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         messageMapper.delete(WrapperMessage1);
         messageMapper.delete(WrapperMessage2);
         friendMapper.delete(Wrapper);

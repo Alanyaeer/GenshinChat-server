@@ -22,7 +22,8 @@ import java.time.LocalDateTime;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
-//    private BigInteger id;
+    @TableId
+    private Long id;
 //    @Schema(description ="我的id")
 
     private String myId;
