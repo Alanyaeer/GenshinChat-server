@@ -7,7 +7,7 @@ spring:
     username: root
     password:
   rabbitmq:
-    host: localhost
+    host: 118.25.143.28
     port: 5672
     username: root
     password: 114514
@@ -21,7 +21,7 @@ spring:
       max-file-size: 500MB
       max-request-size: 500MB
   redis:
-    host: 192.168.139.130
+    host: 118.25.143.28
     port: 6379
     password: 114514
     database: 0

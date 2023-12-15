@@ -26,7 +26,7 @@ public class User implements Serializable {
 //    private String
 //@Schema(description ="创建时间")
 
-@TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime createTime;
     //更新时间
     @TableField(fill = FieldFill.INSERT_UPDATE)

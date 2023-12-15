@@ -170,6 +170,12 @@ public class MessageController {
         }
 
         List<Message> messageList = messageService.getlistById(messageDto);
+        new Thread(()->{
+            for (Message message : messageList) {
+                redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY + messageDto.getMyId() + ":" + messageDto.getFriendId(), JSON.toJSONString(message));
+//                redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY + messageDto.getFriendId()+ ":" + messageDto.getMyId(), JSON.toJSONString(message));
+            }
+        }).start();
         if(messageList == null) return R.error("快去和好友聊天吧!!!");
         return R.success(messageList);
     }
