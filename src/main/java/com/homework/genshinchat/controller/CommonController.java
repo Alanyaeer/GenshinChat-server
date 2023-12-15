@@ -87,7 +87,6 @@ public class CommonController {
             if(message.getChatType() == 1 && message.getImgType() == 2){
                 message.setMsg("");
             }
-            log.info(message.toString());
             messageService.save(message);
             redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY + myId + ":" + friendId , JSON.toJSONString(message));
             IndexRequest request = new IndexRequest("message").id(message.getId().toString());

@@ -26,13 +26,10 @@ public class LivePerson {
         else return false;
     }
     public static void inLivePerson(String id){
-//        System.out.println(liveList.containsKey(id) + "  " + id);
-
         if(liveList.containsKey(id) == false)
             liveList.put(id, true);
     }
     public static void outLivePerson(String id){
-        log.info("移除id为：{}的用户", id);
         liveList.remove(id);
     }
     public static List<FriendDto> getLiveFriendDtoList (){

@@ -144,7 +144,6 @@ public class MessageController {
     @ApiOperation("获取好友消息")
     public R<List<Message>> getChatMsg(@RequestBody MessageDto messageDto)  {
         List<String> MessageStringList = redisTemplate.opsForList().range(CHATLIST_PERSON_KEY + messageDto.getMyId() + ":" + messageDto.getFriendId(), 0, 100);
-        log.info("正在查询是否有缓存消息");
         if(CollectionUtil.isEmpty(MessageStringList) != true){
             List<Message> messageList = MessageStringList.stream().map((e) -> {
                 Message message = JSON.parseObject(e, Message.class);
@@ -152,7 +151,6 @@ public class MessageController {
             }).collect(Collectors.toList());
             return R.success(messageList);
         }
-        log.info(messageDto.getFriendId());
         if(messageDto.getFriendId() == null || messageDto.getFriendId().equals("")){
             SearchRequest request = new SearchRequest("message");
             BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
@@ -168,12 +166,10 @@ public class MessageController {
             }
             return R.success(handleResponse(search));
         }
-
         List<Message> messageList = messageService.getlistById(messageDto);
         new Thread(()->{
             for (Message message : messageList) {
                 redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY + messageDto.getMyId() + ":" + messageDto.getFriendId(), JSON.toJSONString(message));
-//                redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY + messageDto.getFriendId()+ ":" + messageDto.getMyId(), JSON.toJSONString(message));
             }
         }).start();
         if(messageList == null) return R.error("快去和好友聊天吧!!!");
