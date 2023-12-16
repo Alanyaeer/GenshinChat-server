@@ -80,7 +80,7 @@ public class CommonController {
     @ApiOperation("保存信息")
     public R<String> saveMessage(@RequestBody Message message) throws IOException {
 
-//        CACHE_REBUILD_EXECUTOR.submit(()->{
+        CACHE_REBUILD_EXECUTOR.submit(()->{
             String myId = message.getMyId();
             String friendId = message.getFriendId();
             if(message.getChatType() == 1 && message.getImgType() == 2){
@@ -110,7 +110,7 @@ public class CommonController {
             redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY +friendId + ":" + myId  , JSON.toJSONString(message));
             messageService.save(message);
 
-//        });
+        });
         return R.success("存储成功");
     }
     @GetMapping("/downloadfile")
