@@ -182,7 +182,8 @@ public class MessageController {
         SearchHit[] hits = searchHits.getHits();
         List<Message> messageList = new ArrayList<>();
         Long lastid = -1L;
-        for(SearchHit hit: hits){
+        for(int i = hits.length - 1; i >= 0; --i){
+            SearchHit hit = hits[i];
             String json = hit.getSourceAsString();
             Message message = JSON.parseObject(json, Message.class);
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();

@@ -73,7 +73,6 @@ public class CommonController {
         }catch(Exception ex){
             log.info("{}",ex.getMessage());
         }
-        log.info("{}", originFileName);
 
         return R.success("发送成功");
     }
@@ -81,7 +80,7 @@ public class CommonController {
     @ApiOperation("保存信息")
     public R<String> saveMessage(@RequestBody Message message) throws IOException {
 
-        CACHE_REBUILD_EXECUTOR.submit(()->{
+//        CACHE_REBUILD_EXECUTOR.submit(()->{
             String myId = message.getMyId();
             String friendId = message.getFriendId();
             if(message.getChatType() == 1 && message.getImgType() == 2){
@@ -92,7 +91,7 @@ public class CommonController {
             IndexRequest request = new IndexRequest("message").id(message.getId().toString());
             request.source(JSON.toJSONString(message), XContentType.JSON);
             try {
-                if(message.getId().equals(message.getUid()))
+                if(message.getMyId().equals(message.getUid()))
                     client.index(request, RequestOptions.DEFAULT);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -111,7 +110,7 @@ public class CommonController {
             redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY +friendId + ":" + myId  , JSON.toJSONString(message));
             messageService.save(message);
 
-        });
+//        });
         return R.success("存储成功");
     }
     @GetMapping("/downloadfile")
@@ -119,7 +118,6 @@ public class CommonController {
     public String downloadFile(HttpServletResponse response, HttpServletRequest request, String fileName, String extend) throws IOException {
         JSONObject result = new JSONObject();
         File file = new File(basepath + fileName);
-        log.info("{}", extend);
         if (!file.exists()) {
             result.put("error", "下载的文件不存在");
             return result.toString();
@@ -140,11 +138,8 @@ public class CommonController {
     @ApiOperation("上传文件分片")
 
     public R<Integer> uploadchunks(@RequestPart("file")MultipartFile file , @RequestPart("hash") String hash, @RequestPart("chunkcnt") String chunkcnt ,@RequestPart("filename") String filename, @RequestPart("totalCnt") String totalCnt) throws IOException, InterruptedException {
-        log.info("{}", filename);
         String suffix = filename.substring(filename.lastIndexOf("."));
         String prefix = filename.substring(0, filename.lastIndexOf(".") - 1);
-        log.info("{}", suffix);
-        log.info("{}", prefix);
         File dir = new File(basepath  + hash+ "/" + prefix+  "_" + chunkcnt);
         if(!dir.exists()){
             dir.mkdirs();
@@ -153,7 +148,6 @@ public class CommonController {
 //        uploadcache.put(hash, Integer.parseInt(chunkcnt));
         if(uploadcache.containsKey(hash)) uploadcache.put(hash, uploadcache.get(hash) + 1);
         else uploadcache.put(hash, 0);
-        log.info("当前写了: {}", chunkcnt);
         if(chunkcnt.equals(totalCnt)){
             //执行合并
             boolean ismerge = false;
@@ -162,13 +156,11 @@ public class CommonController {
                 for(int i = 0; i <= n; ++i){
                     File fileitem    = new File(basepath + hash + "/" + prefix + "_" + i);
                     if(!fileitem.exists()){
-                        log.info("还有文件没有输入结束");
                         break;
                     }
                     if(i == n) ismerge = true;
                 }
             }
-            log.info("当前的文件为{}/{}",chunkcnt ,totalCnt);
         }
         return R.success(1);
     }
@@ -180,17 +172,14 @@ public class CommonController {
         String hash = map.get("hash").toString();
         String filename = map.get("filename").toString();
         Integer totalCnt = Integer.valueOf(map.get("totalCnt").toString());
-        log.info("开始合并");
         String suffix = filename.substring(filename.lastIndexOf("."));
         String prefix = filename.substring(0, filename.lastIndexOf(".") - 1);
         File mergeFile = new File(basepath + filename);
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(mergeFile));
         // 获取到所有的files
-        log.info("{}", basepath +  hash);
         for(int i = 0; i <= totalCnt; ++i){
 
             File file = new File(basepath + hash + "/" + prefix + "_" +Integer.toString(i));
-            log.info("{}:{}", file.length(), file.getName());
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
             byte[] buffer = new byte[1024];
             // 记录每次读取的字节数
@@ -204,7 +193,6 @@ public class CommonController {
         }
         bos.flush();
         bos.close();
-        log.info("合并成功");
         return R.success(1);
     }
 
@@ -231,7 +219,6 @@ public class CommonController {
 
     public String downloadSliceFile(HttpServletResponse response, HttpServletRequest request , String fileName, String extend, Long start, Long end, int curcnt, String userid, int totalcnt) throws IOException {
         int contentLength = request.getContentLength();
-        log.info("{} : {}" , start, end);
         JSONObject result = new JSONObject();
         File file = new File(basepath + fileName);
         if (!file.exists()) {
@@ -258,7 +245,6 @@ public class CommonController {
 
         String encrypted= DigestUtils.md5DigestAsHex((basepath + fileName + userid).getBytes());
         downloadcache.put(encrypted, curcnt);
-        log.info("{}: {}", curcnt, totalcnt);
         if(curcnt == totalcnt){
             downloadcache.remove(encrypted);
         }

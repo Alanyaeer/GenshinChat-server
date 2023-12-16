@@ -6,12 +6,6 @@ spring:
     url: jdbc:mysql://localhost:3306/genshin_chat?characterEncoding=utf-8&useSSL=false
     username: root
     password:
-  rabbitmq:
-    host: 192.125.183.28
-    port: 5672
-    username: root
-    password: 114514
-    virtual-host: /
   servlet:
     multipart:
       max-file-size: 500MB
@@ -21,7 +15,7 @@ spring:
       max-file-size: 500MB
       max-request-size: 500MB
   redis:
-    host: 192.125.183.28
+    host: 192.168.139.130
     port: 6379
     password: 114514
     database: 0
