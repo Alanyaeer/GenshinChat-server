@@ -76,7 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // md5加密
         String encryptedPasswrd = DigestUtils.md5DigestAsHex(password.getBytes());
         user.setPassword(encryptedPasswrd);
-//        System.out.println(user.getUpdateTime());
+
         if(isuserone == null){
             user.setStatus(false);
             // 也就是说没有这个用户， 直接插入进来

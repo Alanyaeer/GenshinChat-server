@@ -69,7 +69,6 @@ public class CommonController {
         }
         try{
             e.transferTo(new File(basepath + originFileName));
-
         }catch(Exception ex){
             log.info("{}",ex.getMessage());
         }
