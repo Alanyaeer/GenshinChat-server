@@ -4,6 +4,12 @@
 
 ### 前端
 
+#### :earth_asia: 地址
+
+####  [Alanyaeer/GenshinChat-front: websocket + springboot + vue 的聊天项目 (github.com)](https://github.com/Alanyaeer/GenshinChat-front)
+
+
+
 1. 下载好并解压后， 在vscode打开， 输入 npm install 
 2. 输入 npm dev 
 
