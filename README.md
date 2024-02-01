@@ -11,7 +11,7 @@
 
 
 1. 下载好并解压后， 在vscode打开， 输入 npm install 
-2. 输入 npm dev 
+2. 输入 npm run dev 
 
 ### 后端
 
