@@ -28,7 +28,7 @@ public class WechatApplication {
     @Bean
     public RestHighLevelClient client() {
         return new RestHighLevelClient(RestClient.builder(
-                HttpHost.create("http://118.25.143.28:9200")
+                HttpHost.create("http://127.0.0.1:9200")
         ));
     }
 }

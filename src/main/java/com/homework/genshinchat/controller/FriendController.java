@@ -66,10 +66,10 @@ public class FriendController {
 
     @PostConstruct
     private void init(){
-//        List<FriendDto> list = FriendList();
-//        log.info("数据预热");
-//        client.setWithLogicalExpire(FRIEND_ALL_KEY, list, FRIEND_ALL_TTL, TimeUnit.SECONDS);
-//        log.info("预热完毕");
+        List<FriendDto> list = FriendList();
+        log.info("数据预热");
+        client.setWithLogicalExpire(FRIEND_ALL_KEY, list, FRIEND_ALL_TTL, TimeUnit.SECONDS);
+        log.info("预热完毕");
     }
     public List<FriendDto> FriendList() {
         List<User> userList = userService.findAllPerson();
