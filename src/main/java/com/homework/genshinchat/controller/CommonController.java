@@ -31,9 +31,9 @@ import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import static com.homework.genshinchat.constants.RedisConstants.CHATLIST_PERSON_KEY;
-import static com.homework.genshinchat.constants.RedisConstants.FILE_SIZE_KEY;
+import static com.homework.genshinchat.constants.RedisConstants.*;
 
 /**
  * @author 吴嘉豪
@@ -75,7 +75,7 @@ public class CommonController {
 
         return R.success("发送成功");
     }
-    @PutMapping("/saveMsg")
+    @PostMapping("/saveMsg")
     @ApiOperation("保存信息")
     public R<String> saveMessage(@RequestBody Message message) throws IOException {
 
@@ -109,6 +109,9 @@ public class CommonController {
             redisTemplate.opsForList().rightPush(CHATLIST_PERSON_KEY +friendId + ":" + myId  , JSON.toJSONString(message));
             messageService.save(message);
 
+            // 设置 Redis 键的过期时间
+            redisTemplate.expire(CHATLIST_PERSON_KEY + myId + ":" + friendId, REDIS_EXPIRE_TIME, TimeUnit.DAYS);
+            redisTemplate.expire(CHATLIST_PERSON_KEY + friendId + ":" + myId, REDIS_EXPIRE_TIME, TimeUnit.DAYS);
         });
         return R.success("存储成功");
     }
