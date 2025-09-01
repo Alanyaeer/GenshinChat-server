@@ -48,6 +48,9 @@ import static com.homework.genshinchat.constants.RedisConstants.*;
 import static java.lang.Math.abs;
 
 /**
+ * 消息控制器
+ *
+ * @author wps
  * @date 2023/10/21 19:29
  */
 @RestController
@@ -55,21 +58,41 @@ import static java.lang.Math.abs;
 @RequestMapping("/friend")
 @Api(tags = "聊天相关操作")
 public class MessageController {
+    /**
+     * 用户信息服务
+     */
     @Autowired
     private UserInfoService userInfoService;
+    /**
+     * 用户服务
+     */
     @Autowired
     private UserService userService;
+    /**
+     * 朋友服务
+     */
     @Autowired
     private FriendService friendService;
+    /**
+     * 消息服务
+     */
     @Autowired
     private MessageService messageService;
+    /**
+     * redis模板
+     */
     @Autowired
     private StringRedisTemplate redisTemplate;
+    /**
+     * 客户端
+     */
     @Autowired
     private RestHighLevelClient client;
+
     /**
-     * @Author 吴凯煜
-     * @Params map
+     * 获取好友列表
+     *
+     * @param map 地图
      * @return R<Integer>
      */
     @PostMapping("/friendList")
@@ -135,9 +158,11 @@ public class MessageController {
         return R.success(friendDtoList);
 
     }
+
     /**
-     * @Author 吴国烨
-     * @Params messageDto
+     * 获取聊天消息
+     *
+     * @param messageDto 消息dto
      * @return R<Message>
      */
     @PostMapping("chatMsg")
@@ -175,6 +200,13 @@ public class MessageController {
         if(messageList == null) return R.error("快去和好友聊天吧!!!");
         return R.success(messageList);
     }
+
+    /**
+     * 处理响应
+     *
+     * @param response 响应
+     * @return {@link List }<{@link Message }>
+     */
     private static List<Message>  handleResponse(SearchResponse response) {
         SearchHits searchHits = response.getHits();
         Long total = searchHits.getTotalHits().value;

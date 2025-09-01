@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 import static com.homework.genshinchat.constants.RedisConstants.*;
 
 /**
+ * 通用控制器
+ *
  * @author 吴嘉豪
  * @date 2023/10/22 23:12
  */
@@ -45,18 +47,48 @@ import static com.homework.genshinchat.constants.RedisConstants.*;
 @Slf4j
 @Api(tags = "文件相关操作")
 public class CommonController {
+    /**
+     * 消息服务
+     */
     @Autowired
     private MessageService messageService;
+    /**
+     * 客户端
+     */
     @Autowired
     private RestHighLevelClient client;
+    /**
+     * 基础路径
+     */
     private static final String basepath ="D:\\fileandpicture\\";
+    /**
+     * 上传缓存
+     */
     private Map<String, Integer> uploadcache= new HashMap<>();
+    /**
+     * 上传启用
+     */
     private Map<String, Integer> uploadEnable = new HashMap<>();
+    /**
+     * 下载缓存
+     */
     private Map<String, Integer> downloadcache = new HashMap<>();
+    /**
+     * redis模板
+     */
     @Autowired
     private StringRedisTemplate redisTemplate;
+    /**
+     * 缓存重建执行器
+     */
     private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
 
+    /**
+     * 上传文件和图片
+     *
+     * @param e e
+     * @return {@link R }<{@link String }>
+     */
     @PostMapping("/upload")
     @ApiOperation("上传文件")
     public R<String> uploadFileAndPicture(MultipartFile e)  {
@@ -75,6 +107,14 @@ public class CommonController {
 
         return R.success("发送成功");
     }
+
+    /**
+     * 保存消息
+     *
+     * @param message 消息
+     * @return {@link R }<{@link String }>
+     * @throws IOException IOException
+     */
     @PostMapping("/saveMsg")
     @ApiOperation("保存信息")
     public R<String> saveMessage(@RequestBody Message message) throws IOException {
@@ -115,6 +155,17 @@ public class CommonController {
         });
         return R.success("存储成功");
     }
+
+    /**
+     * 下载文件
+     *
+     * @param response 响应
+     * @param request  请求
+     * @param fileName 文件名
+     * @param extend   延伸
+     * @return {@link String }
+     * @throws IOException IOException
+     */
     @GetMapping("/downloadfile")
     @ApiOperation( "下载文件")
     public String downloadFile(HttpServletResponse response, HttpServletRequest request, String fileName, String extend) throws IOException {
@@ -136,6 +187,18 @@ public class CommonController {
         return result.toString();
     }
 
+    /**
+     * 上传块
+     *
+     * @param file     文件
+     * @param hash     哈希
+     * @param chunkcnt chunkcnt
+     * @param filename 文件名
+     * @param totalCnt 碳纳米管总量
+     * @return {@link R }<{@link Integer }>
+     * @throws IOException          IOException
+     * @throws InterruptedException 中断异常
+     */
     @PostMapping("/uploadslice")
     @ApiOperation("上传文件分片")
 
@@ -167,6 +230,13 @@ public class CommonController {
         return R.success(1);
     }
 
+    /**
+     * 文件合并
+     *
+     * @param map 地图
+     * @return {@link R }<{@link Integer }>
+     * @throws IOException IOException
+     */
     @PostMapping("/merge")
     @ApiOperation("文件合并")
 
@@ -198,6 +268,12 @@ public class CommonController {
         return R.success(1);
     }
 
+    /**
+     * 重新上传
+     *
+     * @param map 地图
+     * @return {@link R }<{@link Integer }>
+     */
     @PostMapping("/reupload")
     @ApiOperation("判断文件上传的进度")
 
@@ -208,6 +284,12 @@ public class CommonController {
         return R.success(uploadcache.get(hash) + 1);
     }
 
+    /**
+     * 获取文件大小
+     *
+     * @param map 地图
+     * @return {@link R }<{@link Long }>
+     */
     @RequestMapping("/getsize")
     @ApiOperation( "获取文件的大小")
     public R<Long> getFileSize(@RequestBody Map map){
@@ -216,6 +298,21 @@ public class CommonController {
         return R.success(file.length());
     }
 
+    /**
+     * 下载切片文件
+     *
+     * @param response 响应
+     * @param request  请求
+     * @param fileName 文件名
+     * @param extend   延伸
+     * @param start    开始
+     * @param end      结束
+     * @param curcnt   curcnt
+     * @param userid   用户ID
+     * @param totalcnt 总cnt
+     * @return {@link String }
+     * @throws IOException IOException
+     */
     @RequestMapping("/downloadslicefile")
     @ApiOperation("下载文件的分片")
 
@@ -253,7 +350,13 @@ public class CommonController {
         return result.toString();
 
     }
-    
+
+    /**
+     * 重新下载
+     *
+     * @param map 地图
+     * @return {@link R }<{@link Integer }>
+     */
     @PostMapping("/redownload")
     @ApiOperation("已经下载了多个分片")
     public R<Integer> redownload(@RequestBody Map map){

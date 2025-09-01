@@ -42,6 +42,9 @@ import static com.homework.genshinchat.constants.RedisConstants.*;
 import static java.util.Collections.swap;
 
 /**
+ * 好友控制器
+ *
+ * @author wps
  * @date 2023/10/21 19:29
  */
 
@@ -50,20 +53,44 @@ import static java.util.Collections.swap;
 @RequestMapping("/api")
 @Api(tags = "好友相关操作")
 public class FriendController {
+    /**
+     * 用户信息服务
+     */
     @Autowired
     private UserInfoService userInfoService;
+    /**
+     * 用户服务
+     */
     @Autowired
     private UserService userService;
+    /**
+     * 朋友服务
+     */
     @Autowired
     private FriendService friendService;
+    /**
+     * redis模板
+     */
     @Autowired
     private StringRedisTemplate redisTemplate;
+    /**
+     * 消息服务
+     */
     @Autowired
     private MessageService messageService;
+    /**
+     * 客户端
+     */
     @Autowired
     private CacheClient client;
+    /**
+     * 缓存重建执行器
+     */
     private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(5);
 
+    /**
+     * 初始化
+     */
     @PostConstruct
     private void init(){
         List<FriendDto> list = FriendList();
@@ -71,6 +98,12 @@ public class FriendController {
         client.setWithLogicalExpire(FRIEND_ALL_KEY, list, FRIEND_ALL_TTL, TimeUnit.SECONDS);
         log.info("预热完毕");
     }
+
+    /**
+     * 好友列表
+     *
+     * @return {@link List }<{@link FriendDto }>
+     */
     public List<FriendDto> FriendList() {
         List<User> userList = userService.findAllPerson();
         List<String> ids = userList.stream().map((user)->{
@@ -100,9 +133,10 @@ public class FriendController {
         }).collect(Collectors.toList());
         return friendDtoList;
     }
+
     /**
-     * @Author 吴嘉豪
-     * @param
+     * 获取好友列表
+     *
      * @return R<Integer>
      */
     @PostMapping("/searchfriends")
@@ -115,10 +149,10 @@ public class FriendController {
     }
 
     /**
-     * @Author 祝华笙
-     * @param  friend
-     * @return R<Integer>
+     * 添加好友
      *
+     * @param friend
+     * @return R<Integer>
      */
     @PostMapping("/addfriend")
     @ApiOperation( "增加好友")
@@ -142,10 +176,10 @@ public class FriendController {
     }
 
     /**
-     * @Author 吴凯煜
-     * @param  friend
-     * @return  R<Integer>
+     * 删除好友
      *
+     * @param friend
+     * @return R<Integer>
      */
     @PostMapping("/deletefriend")
     @ApiOperation( "删除好友")
@@ -161,11 +195,12 @@ public class FriendController {
         });
         return R.success(1);
     }
+
     /**
-     * @Author   祝华笙
-     * @param  friend
-     * @return  R<Integer>
+     * 更新好友
      *
+     * @param friend
+     * @return R<Integer>
      */
     @PostMapping("/updatefriend")
     @ApiOperation( "更新好友")
@@ -176,6 +211,13 @@ public class FriendController {
 
         return R.success(1);
     }
+
+    /**
+     * 找朋友
+     *
+     * @param id id
+     * @return {@link R }<{@link FriendDto }>
+     */
     @GetMapping("/findFriend")
     @ApiOperation("查找用户接口")
     public R<FriendDto> findFriend( String id) {

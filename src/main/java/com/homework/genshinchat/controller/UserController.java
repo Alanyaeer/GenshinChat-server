@@ -33,6 +33,9 @@ import static com.homework.genshinchat.constants.RedisConstants.USER_INFO_KEY;
 
 
 /**
+ * 用户控制器
+ *
+ * @author wps
  * @date 2023/10/21 19:29
  */
 @Slf4j
@@ -41,16 +44,35 @@ import static com.homework.genshinchat.constants.RedisConstants.USER_INFO_KEY;
 @Api(tags = "用户相关操作")
 
 public class UserController {
+    /**
+     * 用户服务
+     */
     @Autowired
     private UserService userService;
+    /**
+     * 用户信息服务
+     */
     @Autowired
     private UserInfoService userInfoService;
+    /**
+     * 朋友服务
+     */
     @Autowired
     private FriendService friendService;
+    /**
+     * redis模板
+     */
     @Autowired
     private StringRedisTemplate redisTemplate;
+    /**
+     * 用户信息映射器
+     */
     @Autowired
     private UserInfoMapper userInfoMapper;
+
+    /**
+     * 初始化
+     */
     @PostConstruct
     private void init() {
         log.info("用户信息预热");
@@ -62,8 +84,10 @@ public class UserController {
         log.info("用户信息预热完毕");
 
     }
+
     /**
-     * @Author 吴嘉豪
+     * 注册
+     *
      * @param user
      * @return R<Integer>
      */
@@ -92,8 +116,10 @@ public class UserController {
 
         // 看响应接口返回什么？
     }
+
     /**
-     * @Author 吴嘉豪
+     * 登录
+     *
      * @param map
      * @return R<Integer>
      */
@@ -112,8 +138,10 @@ public class UserController {
         }
         else return R.error("请检查密码或者账号");
     }
+
     /**
-     * @Author 吴嘉豪
+     * getuser 信息
+     *
      * @param map
      * @return R<UserInfoDto>
      */
@@ -138,8 +166,10 @@ public class UserController {
         info.setUserid(id);
         return R.success(info);
     }
+
     /**
-     * @Author 吴国烨
+     * SaveUser信息
+     *
      * @param userInfo
      * @return R<Interger>
      */
@@ -159,8 +189,10 @@ public class UserController {
 
         return R.success(1);
     }
+
     /**
-     * @Author 祝华笙
+     * 登出
+     *
      * @param map
      * @return R<String>
      */
