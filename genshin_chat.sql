@@ -13,10 +13,12 @@
 
  Date: 29/01/2024 12:01:06
 */
+create database genshin_chat;
+
+use genshin_chat
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
 -- ----------------------------
 -- Table structure for friend
 -- ----------------------------

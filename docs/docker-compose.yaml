@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7.4.2
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data  # 新增：数据持久化目录
+    command: redis-server /usr/local/etc/redis/redis.conf
+  mysql:
+    image: mysql:8.0.32
+    ports:
+      - "13306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: wjh
+      MYSQL_PASSWORD: wjh
+      MYSQL_ROOT_HOST: "%"
+    container_name: mysql  # 可选，可以去掉
+    restart: always  # 可选，可以改为 on-failure
+  elasticsearch:
+    image: elasticsearch:7.12.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+volumes:
+  redis_conf:
+  redis_data:
+  mysql_data:
+  es_data:
