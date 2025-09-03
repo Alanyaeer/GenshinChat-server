@@ -1,5 +1,6 @@
 package com.homework.genshinchat.netty.handler;
 
+import com.homework.genshinchat.utils.FileUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,6 +17,7 @@ public class BinaryWebSocketHandler extends SimpleChannelInboundHandler<BinaryWe
         ByteBuf byteBuf = Unpooled.directBuffer();
         byteBuf.writeBytes(msg.content());
         log.info(byteBuf.toString());
+        FileUtils.writeBinaryDataToDiskFile(byteBuf, "1.png");
         ReferenceCountUtil.release(byteBuf);
     }
 }
