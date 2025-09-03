@@ -30,7 +30,7 @@ mybatis-plus:
     db-config:
       id-type: ASSIGN_ID
 knife4j:
-  enable: true
+  enable: false
   openapi:
     title: 聊天管理接口
     description: "聊天管理接口"
