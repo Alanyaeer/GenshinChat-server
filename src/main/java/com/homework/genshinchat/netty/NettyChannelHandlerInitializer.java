@@ -31,6 +31,7 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 .addLast(new HttpObjectAggregator(MAX_HTTP_CONTENT_LENGTH))
                 .addLast(new WebSocketFrameAggregator(MAX_WEBSOCKET_CONTENT_LENGTH))
                 // 压缩，暂时不需要
+//                .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler("/v2/im/server", null, true, MAX_WEBSOCKET_CONTENT_LENGTH))
                 .addLast(new TextWebSocketHandler())
                 .addLast(new BinaryWebSocketHandler())
