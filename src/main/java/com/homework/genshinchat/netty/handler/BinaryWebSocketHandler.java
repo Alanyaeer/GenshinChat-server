@@ -1,8 +1,11 @@
 package com.homework.genshinchat.netty.handler;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -10,5 +13,9 @@ public class BinaryWebSocketHandler extends SimpleChannelInboundHandler<BinaryWe
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg) throws Exception {
         log.info("BinaryWebSocketFrame received: {}", msg);
+        ByteBuf byteBuf = Unpooled.directBuffer();
+        byteBuf.writeBytes(msg.content());
+        log.info(byteBuf.toString());
+        ReferenceCountUtil.release(byteBuf);
     }
 }
