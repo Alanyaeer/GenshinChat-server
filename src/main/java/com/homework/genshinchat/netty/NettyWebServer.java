@@ -6,6 +6,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -30,7 +32,10 @@ public class NettyWebServer implements CommandLineRunner {
 
         NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
         NioEventLoopGroup workGroup = new NioEventLoopGroup();
-
+        DefaultEventExecutorGroup eventExecutors = new DefaultEventExecutorGroup(
+                Runtime.getRuntime().availableProcessors() * 2,
+                new DefaultThreadFactory("netty-handle-event-thread", false)
+        );
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap()
                     .group(bossGroup, workGroup)
@@ -41,12 +46,13 @@ public class NettyWebServer implements CommandLineRunner {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
-                    .childHandler(new NettyChannelHandlerInitializer());
+                    .childHandler(new NettyChannelHandlerInitializer(eventExecutors));
             ChannelFuture channelFuture = serverBootstrap.bind("0.0.0.0", PORT).sync();
             channelFuture.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
             workGroup.shutdownGracefully();
+            eventExecutors.shutdownGracefully();
         }
     }
 }

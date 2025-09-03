@@ -15,15 +15,23 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketChannel> {
+    private final EventExecutorGroup eventExecutors;
 
+    public NettyChannelHandlerInitializer(EventExecutorGroup eventExecutors){
+        this.eventExecutors = eventExecutors;
+    }
     public static final int MAX_HTTP_CONTENT_LENGTH = 65536;
 
     public static final int MAX_WEBSOCKET_CONTENT_LENGTH = 10 * 1024 * 1024;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
+
         socketChannel.pipeline()
                 .addLast(new LoggingHandler(LogLevel.INFO))
                 .addLast(new HttpServerCodec())
@@ -33,8 +41,8 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 // 压缩，暂时不需要
 //                .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new WebSocketServerProtocolHandler("/v2/im/server", null, true, MAX_WEBSOCKET_CONTENT_LENGTH))
-                .addLast(new TextWebSocketHandler())
-                .addLast(new BinaryWebSocketHandler())
+                .addLast(eventExecutors, new TextWebSocketHandler())
+                .addLast(eventExecutors, new BinaryWebSocketHandler())
                 ;
     }
 }
