@@ -3,13 +3,9 @@ package com.homework.genshinchat.netty;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleState;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -45,7 +41,7 @@ public class NettyWebServer implements CommandLineRunner {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
-                    .childHandler(new NettyWebSocketHandlerInitializer());
+                    .childHandler(new NettyChannelHandlerInitializer());
             ChannelFuture channelFuture = serverBootstrap.bind("0.0.0.0", PORT).sync();
             channelFuture.channel().closeFuture().sync();
         } finally {

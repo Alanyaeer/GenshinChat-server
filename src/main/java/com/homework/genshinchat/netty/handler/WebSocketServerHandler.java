@@ -86,7 +86,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             ctx.channel().writeAndFlush(new TextWebSocketFrame(serverResponse));
         } else if (webSocketFrame instanceof PingWebSocketFrame) {
             ctx.channel().writeAndFlush(new PongWebSocketFrame(webSocketFrame.content().retain()));
-        } else {
+        }
+        else if (webSocketFrame instanceof BinaryWebSocketFrame) {
+            BinaryWebSocketFrame binaryWebSocketFrame = (BinaryWebSocketFrame) webSocketFrame;
+
+        }
+        else {
             ctx.close();
         }
     }
