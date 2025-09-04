@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
+@Deprecated
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     public static final int WEBSOCKET_PORT = 8081;
     public static final String WEBSOCKET_ADDRESS = "ws://localhost:" + WEBSOCKET_PORT + "/websocket";
