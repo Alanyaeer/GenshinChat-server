@@ -32,7 +32,7 @@ public class Message implements Serializable {
 //    private Long id;
 //    @Schema(description ="朋友的id")
 
-private String friendId;
+    private String friendId;
 //    @Schema(description ="消息")
 
     private String msg;
