@@ -1,0 +1,32 @@
+server:
+  port: 8082
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:13306/genshin_chat?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: 123456
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  http:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:
+      database: 0
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存数据的过期时间
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID

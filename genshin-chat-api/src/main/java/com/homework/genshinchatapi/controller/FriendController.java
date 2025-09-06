@@ -1,0 +1,214 @@
+package com.homework.genshinchatapi.controller;
+
+import com.alibaba.fastjson.JSON;
+import com.homework.common.common.R;
+import com.homework.common.entity.Friend;
+import com.homework.common.entity.User;
+import com.homework.common.entity.UserInfo;
+import com.homework.common.entity.dto.FriendDto;
+import com.homework.genshinchatapi.service.FriendService;
+import com.homework.genshinchatapi.service.MessageService;
+import com.homework.genshinchatapi.service.UserInfoService;
+import com.homework.genshinchatapi.service.UserService;
+import com.homework.genshinchatapi.utils.CacheClient;
+import com.homework.genshinchatapi.utils.LivePerson;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.homework.common.entity.constants.RedisConstants.*;
+
+
+/**
+ * 好友控制器
+ *
+ * @author wps
+ * @date 2023/10/21 19:29
+ */
+
+@RestController
+@Slf4j
+@RequestMapping("/api")
+@Api(tags = "好友相关操作")
+public class FriendController {
+    /**
+     * 用户信息服务
+     */
+    @Autowired
+    private UserInfoService userInfoService;
+    /**
+     * 用户服务
+     */
+    @Autowired
+    private UserService userService;
+    /**
+     * 朋友服务
+     */
+    @Autowired
+    private FriendService friendService;
+    /**
+     * redis模板
+     */
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+    /**
+     * 消息服务
+     */
+    @Autowired
+    private MessageService messageService;
+    /**
+     * 客户端
+     */
+    @Autowired
+    private CacheClient client;
+    /**
+     * 缓存重建执行器
+     */
+    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(5);
+
+    /**
+     * 初始化
+     */
+    @PostConstruct
+    private void init(){
+        List<FriendDto> list = FriendList();
+        log.info("数据预热");
+        client.setWithLogicalExpire(FRIEND_ALL_KEY, list, FRIEND_ALL_TTL, TimeUnit.SECONDS);
+        log.info("预热完毕");
+    }
+
+    /**
+     * 好友列表
+     *
+     * @return {@link List }<{@link FriendDto }>
+     */
+    public List<FriendDto> FriendList() {
+        List<User> userList = userService.findAllPerson();
+        List<String> ids = userList.stream().map((user)->{
+            String id = user.getId();
+            // 可能这里会出现 Integer 转换为 boolean的问题？
+            return id;
+        }).collect(Collectors.toList());
+
+        List<UserInfo> userInfoList = userInfoService.findbyIds(ids);
+        if(userInfoList==null){
+            return null;
+        }
+        List<FriendDto> friendDtoList = userInfoList.stream().map((userInfo)->{
+            FriendDto friendDto = new FriendDto();
+            // 这里可能要拿redis优化当前status 为 true的用户
+            friendDto.setHeadImg(userInfo.getUserimg());
+            friendDto.setId(userInfo.getUserid());
+            friendDto.setDetail(userInfo.getUserdetail());
+            friendDto.setName(userInfo.getUsername());
+            friendDto.setImg("");
+            friendDto.setLastMsg("");
+            if(LivePerson.checkPersonInLive(userInfo.getUserid()))
+                friendDto.setStatus(true);
+            else friendDto.setStatus(false);
+
+            return friendDto;
+        }).collect(Collectors.toList());
+        return friendDtoList;
+    }
+
+    /**
+     * 获取好友列表
+     *
+     * @return R<Integer>
+     */
+    @PostMapping("/searchfriends")
+    @ApiOperation( "获取好友列表")
+    public R<List<FriendDto>> getFriendList(){
+        //TODO 获取所有人, 同时在查询过程中判断用户是否在线 （从User表中查询用户的status）
+        List<FriendDto> friendDtoList = client
+                .querywithLogicalExpireFriend(FRIEND_ALL_KEY, FriendDto.class, this::FriendList, FRIEND_ALL_TTL, TimeUnit.SECONDS);
+        return R.success(friendDtoList);
+    }
+
+    /**
+     * 添加好友
+     *
+     * @param friend
+     * @return R<Integer>
+     */
+    @PostMapping("/addfriend")
+    @ApiOperation( "增加好友")
+
+    public R<Integer> addFriend(@RequestBody Friend friend){
+        String friendId = friend.getFriendId();
+        String myId = friend.getId();
+        if(friend.getId().trim() == "" || friend.getFriendId().trim() == ""){
+            return R.error("不存在该用户");
+        }
+
+        if(friendService.issue(friend)){
+            CACHE_REBUILD_EXECUTOR.execute(()->{
+//                redisTemplate.opsForList().rightPush(FRIEND_PERSON_KEY + ":"+friendId, JSON.toJSONString(myId));
+                redisTemplate.opsForList().rightPush(FRIEND_PERSON_KEY + ":"+myId, JSON.toJSONString(friend));
+                friendService.save(friend);
+            });
+        }
+        else return R.error("已经添加该用户");
+        return R.success(1);
+    }
+
+    /**
+     * 删除好友
+     *
+     * @param friend
+     * @return R<Integer>
+     */
+    @PostMapping("/deletefriend")
+    @ApiOperation( "删除好友")
+
+    public R<Integer> deleteFriend(@RequestBody Friend friend){
+        String myId = friend.getId();
+        String friendId = friend.getFriendId();
+        CACHE_REBUILD_EXECUTOR.execute(()->{
+            friendService.deleteById(friend);
+            redisTemplate.opsForList().remove(FRIEND_PERSON_KEY + ":"+myId, 0, JSON.toJSONString(friend));
+            redisTemplate.opsForList().remove( FRIEND_PERSON_KEY + ":"+friendId, 0, JSON.toJSONString(friend));
+//            redisTemplate.opsForList(
+        });
+        return R.success(1);
+    }
+
+    /**
+     * 更新好友
+     *
+     * @param friend
+     * @return R<Integer>
+     */
+    @PostMapping("/updatefriend")
+    @ApiOperation( "更新好友")
+
+    public R<Integer> updateFriend(@RequestBody Friend friend){
+        // TODO 就是修改传送过来的好友time
+        friendService.update(friend);
+
+        return R.success(1);
+    }
+
+    /**
+     * 找朋友
+     *
+     * @param id id
+     * @return {@link R }<{@link FriendDto }>
+     */
+    @GetMapping("/findFriend")
+    @ApiOperation("查找用户接口")
+    public R<FriendDto> findFriend( String id) {
+        return R.success(userService.findPersonid(id));
+    }
+}

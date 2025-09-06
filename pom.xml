@@ -5,17 +5,20 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>3.5.5</version>
     </parent>
     <groupId>com.homework</groupId>
+    <packaging>pom</packaging>
     <artifactId>genshinchat</artifactId>
-    <version>dev</version>
-    <name>wechat</name>
-    <description>wechat</description>
+    <version>0.0.1-SNAPSHOT</version>
     <properties>
         <java.version>17</java.version>
     </properties>
+    <modules>
+        <module>genshin-chat-api</module>
+        <module>genshin-chat-common</module>
+        <module>genshin-chat-server</module>
+    </modules>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
