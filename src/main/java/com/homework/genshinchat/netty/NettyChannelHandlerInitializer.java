@@ -12,7 +12,10 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
+
+import java.util.concurrent.TimeUnit;
 
 public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketChannel> {
     private final EventExecutorGroup eventExecutors;
@@ -29,6 +32,7 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
 
         socketChannel.pipeline()
                 .addLast(new LoggingHandler(LogLevel.INFO))
+                .addLast(new IdleStateHandler(60, 0, 0, TimeUnit.SECONDS))
                 .addLast(new HttpServerCodec())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpObjectAggregator(MAX_HTTP_CONTENT_LENGTH))

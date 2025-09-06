@@ -7,13 +7,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.homework.genshinchat.entity.constants.MessageMetaConstants.MY_ID;
-
+@Slf4j
 public class WebSocketConnectionMetaHandler extends ChannelInboundHandlerAdapter{
 
 
@@ -43,7 +46,14 @@ public class WebSocketConnectionMetaHandler extends ChannelInboundHandlerAdapter
                 System.out.println("握手缺少 userId 参数");
                 ctx.close();
             }
-        } else {
+        }
+        else if(evt instanceof IdleStateEvent idleStateEvent){
+            if(IdleState.READER_IDLE.equals(idleStateEvent.state())){
+                log.info("readable timeout close the connection");
+                ctx.close();
+            }
+        }
+        else {
             super.userEventTriggered(ctx, evt);
         }
     }
