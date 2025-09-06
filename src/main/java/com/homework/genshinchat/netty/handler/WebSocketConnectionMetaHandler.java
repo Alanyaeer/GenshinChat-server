@@ -38,9 +38,9 @@ public class WebSocketConnectionMetaHandler extends ChannelInboundHandlerAdapter
                 Channel channel = ctx.channel();
                 channel.attr(AttributeKey.valueOf(MY_ID)).set(userId);
                 ChannelContext.select().registerChannel(userId, channel);
-                System.out.println("✅ 用户 " + userId + " 绑定成功");
+                System.out.println("用户 " + userId + " 绑定成功");
             } else {
-                System.out.println("⚠️ 握手缺少 userId 参数");
+                System.out.println("握手缺少 userId 参数");
                 ctx.close();
             }
         } else {
