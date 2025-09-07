@@ -11,14 +11,28 @@
     <packaging>pom</packaging>
     <artifactId>genshinchat</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <properties>
         <java.version>17</java.version>
+        <mysql.jdbc.version>9.1.0</mysql.jdbc.version>
+        <common.lang.version>20030203.000129</common.lang.version>
+        <hutool.all.version>5.8.24</hutool.all.version>
+        <fastjson.version>1.2.83</fastjson.version>
+        <mybatis.plus.version>3.5.9</mybatis.plus.version>
+        <knife4j.version>4.1.0</knife4j.version>
+        <spring.data.redis.version>3.2.5</spring.data.redis.version>
+        <canal.starter.version>1.2.1-RELEASE</canal.starter.version>
+        <elasticsearch.client.version>7.12.1</elasticsearch.client.version>
+        <hessian.version>4.0.66</hessian.version>
+        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
     </properties>
+
     <modules>
         <module>genshin-chat-api</module>
         <module>genshin-chat-common</module>
         <module>genshin-chat-server</module>
     </modules>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -29,107 +43,115 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
-            <version>8.0.31</version>
+            <version>${mysql.jdbc.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 
-        <!--lombok-->
+        <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-        <!--日志-->
 
+        <!-- 日志 -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <!--redis-->
+
+        <!-- redis -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
         </dependency>
-        <!--工具包-->
+
+        <!-- 工具包 -->
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${common.lang.version}</version>
         </dependency>
+
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.8.22</version>
+            <version>${hutool.all.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.76</version>
+            <version>${fastjson.version}</version>
         </dependency>
 
-        <!--mybatis-plus-->
-        <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
+        <!-- mybatis-plus -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-            <version>3.5.9</version>
+            <version>${mybatis.plus.version}</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-jsqlparser</artifactId>
-            <version>3.5.9</version>
+            <version>${mybatis.plus.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-websocket -->
-        <!-- https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-websocket -->
+
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
-            <version>4.1.0</version>
+            <version>${knife4j.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-            <version>3.2.5</version>
+            <version>${spring.data.redis.version}</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--canal-->
+
+        <!-- canal -->
         <dependency>
             <groupId>top.javatool</groupId>
             <artifactId>canal-spring-boot-starter</artifactId>
-            <version>1.2.1-RELEASE</version>
+            <version>${canal.starter.version}</version>
         </dependency>
-        <!--es-->
+
+        <!-- elasticsearch -->
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>7.12.1</version>
+            <version>${elasticsearch.client.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
-            <version>4.0.66</version>
+            <version>${hessian.version}</version>
         </dependency>
     </dependencies>
 
@@ -142,12 +164,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version> <!-- 建议新版本 -->
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
