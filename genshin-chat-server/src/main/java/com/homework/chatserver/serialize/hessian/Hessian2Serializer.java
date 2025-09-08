@@ -3,7 +3,6 @@ package com.homework.chatserver.serialize.hessian;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.HessianInput;
 import com.homework.chatserver.serialize.Serializer;
 import com.homework.common.exception.SerializeException;
 import org.springframework.stereotype.Component;
@@ -14,8 +13,8 @@ import java.io.ByteArrayOutputStream;
 /**
  * Hessian is a dynamically-typed, binary serialization and Web Services protocol designed for object-oriented transmission.
  *
- * @author Vinlee Xiao
- * @createTime 2022/2/23 21:11
+ * @author Wu jiahao
+ * @createTime 2025-09-08
  */
 @Component
 public class Hessian2Serializer implements Serializer {
