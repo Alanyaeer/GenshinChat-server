@@ -1,5 +1,6 @@
 package com.homework.chatserver.netty;
 
+import com.homework.chatserver.netty.codec.RpcMessageEncoder;
 import com.homework.chatserver.netty.handler.BinaryWebSocketHandler;
 import com.homework.chatserver.netty.handler.TextWebSocketHandler;
 import com.homework.chatserver.netty.handler.WebSocketConnectionMetaHandler;
@@ -42,6 +43,8 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
 //                .addLast(new WebSocketServerCompressionHandler(0))
                 .addLast(new WebSocketServerProtocolHandler("/v2/im/server", null, true, MAX_WEBSOCKET_CONTENT_LENGTH, false, true))
                 .addLast(new WebSocketConnectionMetaHandler())
+                .addLast(new RpcMessageEncoder())
+//                .addLast(new RpcMessageDecoder())
                 .addLast(eventExecutors, new TextWebSocketHandler())
                 .addLast(eventExecutors, new BinaryWebSocketHandler())
                 ;

@@ -1,4 +1,4 @@
-package com.homework.chatserver.netty.compress;
+package com.homework.chatserver.compress;
 
 public interface Compress {
 

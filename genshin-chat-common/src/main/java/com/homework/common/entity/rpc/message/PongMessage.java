@@ -1,4 +1,4 @@
-package com.homework.common.entity.message;
+package com.homework.common.entity.rpc.message;
 
 import com.homework.common.entity.enums.MessageTypeEnum;
 

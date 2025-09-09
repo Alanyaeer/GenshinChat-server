@@ -1,6 +1,7 @@
-package com.homework.chatserver.netty.compress.gzip;
+package com.homework.chatserver.compress.gzip;
 
-import com.homework.chatserver.netty.compress.Compress;
+import com.homework.chatserver.compress.Compress;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import java.util.zip.GZIPOutputStream;
  * @author wps
  * @date 2025/09/08
  */
+@Component
 public class GzipCompress implements Compress {
 
 

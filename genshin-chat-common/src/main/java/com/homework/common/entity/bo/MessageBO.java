@@ -9,6 +9,7 @@ import lombok.Data;
  * @date 2025/09/04
  */
 @Data
+@Deprecated
 public class MessageBO {
     /**
      * 发给谁

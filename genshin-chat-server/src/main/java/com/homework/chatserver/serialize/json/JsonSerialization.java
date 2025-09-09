@@ -1,6 +1,6 @@
 package com.homework.chatserver.serialize.json;
 
-import com.homework.chatserver.serialize.Serializer;
+import com.homework.chatserver.serialize.Serialization;
 import com.homework.genshinchatapi.utils.GsonUtils;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @date 2025/09/06
  */
 @Component
-public class JsonSerializer implements Serializer {
+public class JsonSerialization implements Serialization {
     @Override
     public byte[] serialize(Object obj) {
         return GsonUtils.toJson(obj).getBytes();

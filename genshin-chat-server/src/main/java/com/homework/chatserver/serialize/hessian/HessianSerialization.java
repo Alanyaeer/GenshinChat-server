@@ -1,43 +1,43 @@
 package com.homework.chatserver.serialize.hessian;
 
-
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.homework.chatserver.serialize.Serializer;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.homework.chatserver.serialize.Serialization;
 import com.homework.common.exception.SerializeException;
-import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 /**
- * Hessian is a dynamically-typed, binary serialization and Web Services protocol designed for object-oriented transmission.
- *
- * @author Wu jiahao
- * @createTime 2025-09-08
+ * @author 嘉豪舞团-吴嘉豪
+ * @date 2025/9/9
  */
-@Component
-public class Hessian2Serializer implements Serializer {
+public class HessianSerialization implements Serialization {
     @Override
     public byte[] serialize(Object obj) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Hessian2Output hessianOutput = new Hessian2Output(byteArrayOutputStream);
+            HessianOutput hessianOutput = new HessianOutput(byteArrayOutputStream);
             hessianOutput.writeObject(obj);
 
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
             throw new SerializeException("Serialization failed");
         }
+
     }
 
     @Override
     public <T> T deserialize(byte[] bytes, Class<T> clazz) {
+
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
-            Hessian2Input hessianInput = new Hessian2Input(byteArrayInputStream);
+            HessianInput hessianInput = new HessianInput(byteArrayInputStream);
             Object o = hessianInput.readObject();
+
             return clazz.cast(o);
+
         } catch (Exception e) {
             throw new SerializeException("Deserialization failed");
         }
+
     }
 }

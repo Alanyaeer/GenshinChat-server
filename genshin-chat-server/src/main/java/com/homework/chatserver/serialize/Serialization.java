@@ -1,6 +1,6 @@
 package com.homework.chatserver.serialize;
 
-public interface Serializer {
+public interface Serialization {
     /**
      * 序列化
      *

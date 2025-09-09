@@ -1,6 +1,7 @@
 package com.homework.chatserver.netty.handler;
 
 import com.homework.chatserver.netty.channel.ChannelContext;
+import com.homework.common.entity.rpc.message.PingMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -26,12 +27,15 @@ public class WebSocketConnectionMetaHandler extends ChannelInboundHandlerAdapter
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if(msg instanceof PingWebSocketFrame){
+        if(msg instanceof PingWebSocketFrame || msg instanceof PingMessage){
             try {
                 ctx.writeAndFlush(new PongWebSocketFrame());
             } finally {
                 ReferenceCountUtil.release(msg);
             }
+        }
+        else{
+            ctx.fireChannelRead(msg);
         }
     }
 
