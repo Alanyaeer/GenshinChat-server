@@ -8,4 +8,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>genshin-chat-common</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
 </project>

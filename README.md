@@ -14,8 +14,7 @@
 2. 输入 npm run dev 
 
 ### 后端
-
-1. 略
+1. 现在如果想要部署项目，需要将分支切换到tomcat-websocket
 
 
 
