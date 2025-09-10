@@ -18,12 +18,12 @@ public class RedisIdGenerator implements IdGenerator{
     private RedisTemplate<String, Long> redisTemplate;
 
     @Override
-    public Integer generateId() {
+    public int nextShortId() {
         return redisTemplate.opsForValue().increment(ID_GENERATOR_KEY).intValue();
     }
 
     @Override
-    public Long generateLongId() {
+    public long nextId() {
         return redisTemplate.opsForValue().increment(ID_GENERATOR_LONG_KEY);
     }
 }

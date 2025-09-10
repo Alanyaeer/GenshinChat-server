@@ -5,6 +5,17 @@ package com.homework.chatserver.utils.idgenerator;
  * @date 2025/9/9
  */
 public interface IdGenerator {
-    Integer generateId();
-    Long generateLongId();
+    /**
+     * 获取雪花算法的id
+     *
+     * @return int
+     */
+    int nextShortId();
+
+    /**
+     * 获取雪花算法id
+     *
+     * @return long
+     */
+    long nextId();
 }

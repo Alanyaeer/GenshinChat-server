@@ -22,13 +22,13 @@ public class SnowFlakeIdGenerator implements IdGenerator {
      * @return {@link Integer }
      */
     @Override
-    public Integer generateId() {
+    public int nextShortId() {
         Long extractNum = snowflakeGenerator.next() % Integer.MAX_VALUE;
         return extractNum.intValue();
     }
 
     @Override
-    public Long generateLongId() {
+    public long nextId() {
         return snowflakeGenerator.next();
     }
 }

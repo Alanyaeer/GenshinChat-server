@@ -8,6 +8,7 @@ import com.homework.common.entity.constants.RpcConstants;
 import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.Message;
+import com.homework.common.utils.hash.MurMurHash;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -26,7 +27,7 @@ import static com.homework.common.entity.constants.RpcConstants.ID_GENERATOR_VER
  *   |                                        ... ...                                                        |
  *   +-------------------------------------------------------------------------------------------------------+
  * 4B  magic code（魔法数）   1B version（版本）   4B full length（消息长度）    1B messageType（消息类型）
- * 1B compress（压缩类型） 1B codec（序列化类型）    4B  requestId（请求的Id）
+ * 1B compress（压缩类型） 1B codec（序列化类型）    4B  requestId（请求的Id 经过hash操作的）
  * body（object类型数据）
  * </pre>
  * @author 嘉豪舞团-吴嘉豪
@@ -42,7 +43,9 @@ public class RpcMessageEncoder extends MessageToByteEncoder<Message> {
         byteBuf.writeByte(message.getMessageType().getCode());
         byteBuf.writeByte(message.getCodecType());
         byteBuf.writeByte(message.getCompressType());
-        byteBuf.writeInt(idGenerator.generateId());
+        // 使用murmurHash映射
+        long nextId = idGenerator.nextId();
+        byteBuf.writeInt(MurMurHash.hashLong(nextId));
         int fullLength = RpcConstants.HEAD_LENGTH;
         if(message.getMessageType().getCode() != RpcConstants.HEARTBEAT_REQUEST_TYPE && message.getMessageType().getCode() != RpcConstants.HEARTBEAT_RESPONSE_TYPE){
             // 序列化
