@@ -8,15 +8,13 @@ import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.*;
-import com.homework.common.exception.MessageMagicNumberIllegalException;
+import com.homework.common.exception.rpc.RpcMessageMagicNumberIllegalException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * <pre>
@@ -129,7 +127,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         byte[] bytes = new byte[length];
         in.readBytes(bytes);
         if (bytes != RpcConstants.MAGIC_NUMBER) {
-            throw new MessageMagicNumberIllegalException("魔数消息不正确" + Arrays.toString(bytes));
+            throw new RpcMessageMagicNumberIllegalException("魔数消息不正确" + Arrays.toString(bytes));
         }
     }
 }
