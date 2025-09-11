@@ -78,7 +78,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         int requestId = in.readInt();
         // todo 消息幂等判断
         Message baseMessage = Message.builder()
-                .messageType(messageType)
+                .messageValueType(messageType)
                 .compressType(compressType)
                 .codecType(codecType)
                 .id(requestId)
