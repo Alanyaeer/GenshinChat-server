@@ -77,14 +77,20 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         byte compressType = in.readByte();
         int requestId = in.readInt();
         // todo 消息幂等判断
-        Message baseMessage = Message.builder()
-                .messageValueType(messageType)
+//        Message baseMessage = Message.builder()
+//                .messageValueType(messageType)
+//                .compressType(compressType)
+//                .codecType(codecType)
+//                .id(requestId)
+//                .build();
+        DefaultMessage message = DefaultMessage.builder()
+                .messageType(messageType)
                 .compressType(compressType)
                 .codecType(codecType)
                 .id(requestId)
                 .build();
-        if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE || messageType == RpcConstants.HEARTBEAT_RESPONSE_TYPE) {
-            if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) return new PingMessage();
+        if (isHeartbeatMessage(messageType)) {
+            if (messageType == MessageTypeEnum.PING.getCode()) return new PingMessage();
             else return new PongMessage();
         }
         int bodyLength = fullLength - RpcConstants.HEAD_LENGTH;
@@ -102,11 +108,11 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
 
             if (messageType == MessageTypeEnum.TEXT.getCode()) {
                 TextMessage textMessage = serialization.deserialize(decompressBytes, TextMessage.class);
-                textMessage.fillHeaderFields(baseMessage);
+                textMessage.fillHeaderFields(message);
                 return textMessage;
             } else if (messageType == MessageTypeEnum.MEDIA.getCode()) {
                 MediaMessage mediaMessage = serialization.deserialize(decompressBytes, MediaMessage.class);
-                mediaMessage.fillHeaderFields(baseMessage);
+                mediaMessage.fillHeaderFields(message);
                 return mediaMessage;
             }
 
@@ -129,5 +135,9 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         if (bytes != RpcConstants.MAGIC_NUMBER) {
             throw new RpcMessageMagicNumberIllegalException("魔数消息不正确" + Arrays.toString(bytes));
         }
+    }
+
+    public boolean isHeartbeatMessage(byte messageType){
+        return messageType == MessageTypeEnum.PING.getCode() || messageType == MessageTypeEnum.PONG.getCode();
     }
 }

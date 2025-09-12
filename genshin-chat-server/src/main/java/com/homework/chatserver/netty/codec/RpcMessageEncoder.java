@@ -7,6 +7,7 @@ import com.homework.chatserver.utils.idgenerator.IdGenerator;
 import com.homework.common.entity.constants.RpcConstants;
 import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
+import com.homework.common.entity.rpc.message.DefaultMessage;
 import com.homework.common.entity.rpc.message.Message;
 import com.homework.common.utils.hash.MurMurHash;
 import io.netty.buffer.ByteBuf;
@@ -33,21 +34,21 @@ import static com.homework.common.entity.constants.RpcConstants.ID_GENERATOR_VER
  * @author 嘉豪舞团-吴嘉豪
  * @date 2025/9/9
  */
-public class RpcMessageEncoder extends MessageToByteEncoder<Message> {
+public class RpcMessageEncoder extends MessageToByteEncoder<DefaultMessage> {
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, Message message, ByteBuf byteBuf) throws Exception {
+    protected void encode(ChannelHandlerContext channelHandlerContext, DefaultMessage message, ByteBuf byteBuf) throws Exception {
         IdGenerator idGenerator = SpringContextHolder.getBean(ID_GENERATOR_VERSION.getName(), IdGenerator.class);
 
         byteBuf.writeBytes(RpcConstants.MAGIC_NUMBER);
         byteBuf.writeByte(RpcConstants.VERSION);
-        byteBuf.writeByte(message.getMessageType().getCode());
+        byteBuf.writeByte(message.getMessageType());
         byteBuf.writeByte(message.getCodecType());
         byteBuf.writeByte(message.getCompressType());
         // 使用murmurHash映射
         long nextId = idGenerator.nextId();
         byteBuf.writeInt(MurMurHash.hashLong(nextId));
         int fullLength = RpcConstants.HEAD_LENGTH;
-        if(message.getMessageType().getCode() != RpcConstants.HEARTBEAT_REQUEST_TYPE && message.getMessageType().getCode() != RpcConstants.HEARTBEAT_RESPONSE_TYPE){
+        if(!message.isHeartbeatMessage()){
             // 序列化
             String serializeName = SerializationTypeEnum.getName(message.getCodecType());
             Serialization serialization = SpringContextHolder.getBean(serializeName, Serialization.class);
