@@ -14,10 +14,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DefaultMessage implements Message {
-    private byte codecType;
-    private byte messageType;
-    private byte compressType;
-    private long id;
+    private transient byte codecType;
+    private transient byte messageType;
+    private transient byte compressType;
+    private transient long id;
 
     @Override
     public void fillHeaderFields(Message message) {
