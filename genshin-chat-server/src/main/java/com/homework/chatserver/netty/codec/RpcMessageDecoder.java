@@ -49,19 +49,15 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         Object decoded = super.decode(ctx, in);
-        if (decoded instanceof ByteBuf) {
-            ByteBuf frame = (ByteBuf) decoded;
+        if (decoded instanceof ByteBuf frame) {
             if (frame.readableBytes() >= RpcConstants.TOTAL_LENGTH) {
                 try {
-                    return decodeFrame(frame);
+                    return decodeFrame(frame.retain());
                 } catch (Exception e) {
                     log.error("Decode frame error!", e);
                     throw e;
-                } finally {
-                    frame.release();
                 }
             }
-
         }
         return decoded;
     }
@@ -83,7 +79,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
 //                .codecType(codecType)
 //                .id(requestId)
 //                .build();
-        DefaultMessage message = DefaultMessage.builder()
+        BaseMessage message = BaseMessage.builder()
                 .messageType(messageType)
                 .compressType(compressType)
                 .codecType(codecType)
@@ -132,7 +128,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         int length = RpcConstants.MAGIC_NUMBER.length;
         byte[] bytes = new byte[length];
         in.readBytes(bytes);
-        if (bytes != RpcConstants.MAGIC_NUMBER) {
+        if (RpcConstants.MAGIC_NUMBER.equals(bytes)) {
             throw new RpcMessageMagicNumberIllegalException("魔数消息不正确" + Arrays.toString(bytes));
         }
     }

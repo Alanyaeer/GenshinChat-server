@@ -16,6 +16,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
@@ -26,10 +27,11 @@ import static com.homework.chatserver.netty.NettyChannelHandlerInitializer.MAX_W
  * @author 嘉豪舞团-吴嘉豪
  * @date 2025/9/12
  */
+@Component
 @Slf4j
 public class NettyWebClient {
     @SneakyThrows
-    public static void main(String[] args) {
+    public void startConnect(){
         URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=1234");
 
         WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(
@@ -59,8 +61,6 @@ public class NettyWebClient {
             // 等待握手完成
             WebSocketClientHandler handler = channel.pipeline().get(WebSocketClientHandler.class);
             handler.handshakeFuture().sync();
-
-            // json 序列化， gzip 压缩
 
             TextMessage textMessage = TextMessage.builder()
                     .text("hello world")

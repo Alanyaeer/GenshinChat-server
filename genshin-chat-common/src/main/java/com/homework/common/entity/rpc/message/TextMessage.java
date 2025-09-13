@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-public class TextMessage extends DefaultMessage {
+public class TextMessage extends BaseMessage {
     private String text;
     private Long userId;
     private Long toUserId;

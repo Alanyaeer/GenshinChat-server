@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-public class MediaMessage extends DefaultMessage {
+public class MediaMessage extends BaseMessage {
     private String url;
     private Long userId;
     private Long toUserId;

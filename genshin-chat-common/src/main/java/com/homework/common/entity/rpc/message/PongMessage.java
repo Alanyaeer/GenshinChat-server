@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 
-public class PongMessage extends DefaultMessage {
+public class PongMessage extends BaseMessage {
     // 禁止修改消息类型
     @Override
     public final void setMessageType(byte messageType) {

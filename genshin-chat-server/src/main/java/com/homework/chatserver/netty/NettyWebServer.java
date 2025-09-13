@@ -8,6 +8,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -19,6 +20,9 @@ import java.util.concurrent.Executors;
 @Component
 @Slf4j
 public class NettyWebServer implements CommandLineRunner {
+    @Resource
+    private NettyWebClient nettyWebClient;
+
     public static final int PORT = 8081;
 
     // 创建一个线程池，用于执行Netty服务器的启动任务
@@ -48,6 +52,7 @@ public class NettyWebServer implements CommandLineRunner {
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new NettyChannelHandlerInitializer(eventExecutors));
             ChannelFuture channelFuture = serverBootstrap.bind(PORT).sync();
+            nettyWebClient.startConnect();
             channelFuture.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();

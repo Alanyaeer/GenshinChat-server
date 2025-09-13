@@ -14,7 +14,7 @@ public class RpcConstants {
     public static final byte[] MAGIC_NUMBER = {(byte) 'g', (byte) 'r', (byte) 'p', (byte) 'c'};
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     // idGenerator version
-    public static final IdGeneratorTypeEnum ID_GENERATOR_VERSION = IdGeneratorTypeEnum.REDIS_INCREMENT;
+    public static final IdGeneratorTypeEnum ID_GENERATOR_VERSION = IdGeneratorTypeEnum.SNOWFLAKE;
     //version information
     public static final byte VERSION = 1;
     public static final byte TOTAL_LENGTH = 16;

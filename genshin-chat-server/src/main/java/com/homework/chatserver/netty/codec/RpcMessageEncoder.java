@@ -7,12 +7,14 @@ import com.homework.chatserver.utils.idgenerator.IdGenerator;
 import com.homework.common.entity.constants.RpcConstants;
 import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
-import com.homework.common.entity.rpc.message.DefaultMessage;
-import com.homework.common.entity.rpc.message.Message;
+import com.homework.common.entity.rpc.message.BaseMessage;
 import com.homework.common.utils.hash.MurMurHash;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+
+import java.util.List;
 
 import static com.homework.common.entity.constants.RpcConstants.ID_GENERATOR_VERSION;
 
@@ -34,13 +36,15 @@ import static com.homework.common.entity.constants.RpcConstants.ID_GENERATOR_VER
  * @author 嘉豪舞团-吴嘉豪
  * @date 2025/9/9
  */
-public class RpcMessageEncoder extends MessageToByteEncoder<DefaultMessage> {
+public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, DefaultMessage message, ByteBuf byteBuf) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, BaseMessage message, List<Object> out) throws Exception {
         IdGenerator idGenerator = SpringContextHolder.getBean(ID_GENERATOR_VERSION.getName(), IdGenerator.class);
-
+        ByteBuf byteBuf = ctx.alloc().buffer();
         byteBuf.writeBytes(RpcConstants.MAGIC_NUMBER);
         byteBuf.writeByte(RpcConstants.VERSION);
+        // 长度字段必须填写
+        byteBuf.writeInt(0); // 占位，后面再回填
         byteBuf.writeByte(message.getMessageType());
         byteBuf.writeByte(message.getCodecType());
         byteBuf.writeByte(message.getCompressType());
@@ -68,6 +72,7 @@ public class RpcMessageEncoder extends MessageToByteEncoder<DefaultMessage> {
         byteBuf.writeInt(fullLength);
         // 复原原来的索引
         byteBuf.writerIndex(writeIndex);
+        out.add(new BinaryWebSocketFrame(byteBuf));
     }
 
 }

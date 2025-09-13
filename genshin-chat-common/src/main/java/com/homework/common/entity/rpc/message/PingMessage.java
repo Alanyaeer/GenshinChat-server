@@ -1,13 +1,12 @@
 package com.homework.common.entity.rpc.message;
 
 import com.homework.common.entity.enums.MessageTypeEnum;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @NoArgsConstructor
-public class PingMessage extends DefaultMessage {
+public class PingMessage extends BaseMessage {
     // 禁止修改消息类型
     @Override
     public final void setMessageType(byte messageType) {

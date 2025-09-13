@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DefaultMessage implements Message {
+public class BaseMessage implements Message {
     private transient byte codecType;
     private transient byte messageType;
     private transient byte compressType;
@@ -21,11 +21,11 @@ public class DefaultMessage implements Message {
 
     @Override
     public void fillHeaderFields(Message message) {
-        if (message instanceof DefaultMessage defaultMessage) {
-            defaultMessage.setCodecType(this.codecType);
-            defaultMessage.setMessageType(this.messageType);
-            defaultMessage.setCompressType(this.compressType);
-            defaultMessage.setId(this.id);
+        if (message instanceof BaseMessage baseMessage) {
+            baseMessage.setCodecType(this.codecType);
+            baseMessage.setMessageType(this.messageType);
+            baseMessage.setCompressType(this.compressType);
+            baseMessage.setId(this.id);
         }
     }
 
