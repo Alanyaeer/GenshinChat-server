@@ -25,6 +25,8 @@
         <elasticsearch.client.version>7.12.1</elasticsearch.client.version>
         <hessian.version>4.0.66</hessian.version>
         <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+        <protostuff.version>1.7.2</protostuff.version>
+        <kryo.version>4.0.2</kryo.version>
         <guava.version>33.4.8-jre</guava.version>
     </properties>
 

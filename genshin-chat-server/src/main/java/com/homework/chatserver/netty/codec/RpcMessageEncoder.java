@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ import static com.homework.common.entity.constants.RpcConstants.ID_GENERATOR_VER
  * @author 嘉豪舞团-吴嘉豪
  * @date 2025/9/9
  */
+@Slf4j
 public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
     @Override
     protected void encode(ChannelHandlerContext ctx, BaseMessage message, List<Object> out) throws Exception {
@@ -75,4 +77,9 @@ public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
         out.add(new BinaryWebSocketFrame(byteBuf));
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        log.info("异常: {}", cause.getMessage());
+        ctx.close();
+    }
 }

@@ -68,8 +68,8 @@ public class NettyWebClient {
                     .text("hello world")
                     .userId(1332L)
                     .toUserId(3224L)
-                    .compressType(CompressTypeEnum.GZIP.getCode())
-                    .codecType(SerializationTypeEnum.JSON.getCode())
+                    .compressType(CompressTypeEnum.NONE.getCode())
+                    .codecType(SerializationTypeEnum.PROTOSTUFF.getCode())
                     .messageType(MessageTypeEnum.TEXT.getCode())
                     .build();
             log.info(textMessage.toString());
