@@ -4,11 +4,13 @@ import com.homework.common.entity.enums.MessageTypeEnum;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @SuperBuilder
 @AllArgsConstructor
-public class MediaMessage extends BaseMessage {
+public class MediaMessage extends BaseMessage implements Serializable {
     private String url;
     private Long userId;
     private Long toUserId;

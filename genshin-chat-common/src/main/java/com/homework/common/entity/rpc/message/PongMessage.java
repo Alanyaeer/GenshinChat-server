@@ -4,11 +4,13 @@ import com.homework.common.entity.enums.MessageTypeEnum;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
+
 
 @SuperBuilder
 @NoArgsConstructor
 
-public class PongMessage extends BaseMessage {
+public class PongMessage extends BaseMessage implements Serializable {
     // 禁止修改消息类型
     @Override
     public final void setMessageType(byte messageType) {

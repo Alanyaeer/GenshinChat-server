@@ -4,6 +4,8 @@ import com.homework.common.entity.enums.MessageTypeEnum;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
+
 /**
  * @author 嘉豪舞团-吴嘉豪
  * @date 2025/9/12
@@ -13,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseMessage implements Message {
+public class BaseMessage implements Message, Serializable {
     private transient byte codecType;
     private transient byte messageType;
     private transient byte compressType;

@@ -23,7 +23,7 @@ public class Hessian2Serialization implements Serialization {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Hessian2Output hessianOutput = new Hessian2Output(byteArrayOutputStream);
             hessianOutput.writeObject(obj);
-
+            hessianOutput.flush();
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
             throw new SerializeException("Serialization failed");

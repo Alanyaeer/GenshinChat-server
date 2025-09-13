@@ -2,7 +2,9 @@ package com.homework.chatserver.netty;
 
 import com.homework.chatserver.netty.codec.RpcMessageDecoder;
 import com.homework.chatserver.netty.codec.RpcMessageEncoder;
+import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
+import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.TextMessage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -66,8 +68,8 @@ public class NettyWebClient {
                     .text("hello world")
                     .userId(1332L)
                     .toUserId(3224L)
-                    .compressType((byte) 0x01)
-                    .codecType((byte) 0x00)
+                    .compressType(CompressTypeEnum.GZIP.getCode())
+                    .codecType(SerializationTypeEnum.JSON.getCode())
                     .messageType(MessageTypeEnum.TEXT.getCode())
                     .build();
             log.info(textMessage.toString());
