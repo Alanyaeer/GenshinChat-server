@@ -111,21 +111,21 @@ public class NettyWebClient {
                 try {
                     handshaker.finishHandshake(ch, (FullHttpResponse) msg);
                     handshakeFuture.setSuccess();
-                    System.out.println("WebSocket 握手成功!");
+                    log.info("WebSocket 握手成功!");
                 } catch (WebSocketHandshakeException e) {
                     handshakeFuture.setFailure(e);
-                    System.out.println("WebSocket 握手失败!");
+                    log.info("WebSocket 握手失败!");
                 }
                 return;
             }
 
             // 握手完成后，处理 WebSocket 帧
             if (msg instanceof TextWebSocketFrame) {
-                System.out.println("收到消息: " + ((TextWebSocketFrame) msg).text());
+                log.info("收到消息: " + ((TextWebSocketFrame) msg).text());
             } else if (msg instanceof PongWebSocketFrame) {
-                System.out.println("收到 Pong");
+                log.info("收到 Pong");
             } else if (msg instanceof CloseWebSocketFrame) {
-                System.out.println("连接关闭");
+                log.info("连接关闭");
                 ch.close();
             }
         }

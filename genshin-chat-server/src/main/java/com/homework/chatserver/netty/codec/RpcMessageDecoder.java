@@ -90,7 +90,6 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
             else return new PongMessage();
         }
         int bodyLength = fullLength - RpcConstants.HEAD_LENGTH;
-
         if (bodyLength > 0) {
             byte[] bodyBytes = new byte[bodyLength];
             in.readBytes(bodyBytes);
