@@ -64,7 +64,7 @@ services:
   # Server服务（端口8082）
   genshin-chat-server:
     build:
-      context: .
+      context: ../
       dockerfile: ./genshin-chat-server/Dockerfile  # 指定Server服务的Dockerfile路径
     container_name: genshin-chat-server
     ports:
