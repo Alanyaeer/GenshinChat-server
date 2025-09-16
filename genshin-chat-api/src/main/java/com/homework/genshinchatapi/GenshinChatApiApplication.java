@@ -17,10 +17,5 @@ public class GenshinChatApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(GenshinChatApiApplication.class, args);
     }
-    @Bean
-    public RestHighLevelClient client() {
-        return new RestHighLevelClient(RestClient.builder(
-                HttpHost.create("http://es:9200")
-        ));
-    }
+
 }

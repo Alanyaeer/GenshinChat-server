@@ -1,0 +1,7 @@
+mysql:
+  host: localhost
+  port: 13306
+redis:
+  host: localhost
+es:
+  host: localhost

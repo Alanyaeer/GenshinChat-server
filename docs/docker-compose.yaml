@@ -55,6 +55,8 @@ services:
       - elasticsearch
     ports:
       - "8080:8080"  # 宿主机端口:容器内端口
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # 可选：指定Spring环境配置
     restart: unless-stopped  # 容器退出时除非手动停止，否则自动重启
     networks:
       - genshin-network  # 加入自定义网络，便于服务间通信
@@ -70,6 +72,8 @@ services:
     restart: unless-stopped
     networks:
       - genshin-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # 可选：指定Spring环境配置
     depends_on:
       - genshin-chat-api  # 可选：指定依赖关系，确保API服务先启动
       - mysql
