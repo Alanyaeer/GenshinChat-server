@@ -10,6 +10,8 @@ services:
       - redis_conf:/usr/local/etc/redis/redis.conf
       - redis_data:/data  # 新增：数据持久化目录
     command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - genshin-network
   mysql:
     image: mysql:8.0.32
     ports:
@@ -25,6 +27,8 @@ services:
       MYSQL_ROOT_HOST: "%"
     container_name: mysql  # 可选，可以去掉
     restart: always  # 可选，可以改为 on-failure
+    networks:
+      - genshin-network
   elasticsearch:
     image: elasticsearch:7.12.1
     container_name: elasticsearch
@@ -37,6 +41,44 @@ services:
       - "9300:9300"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    networks:
+      - genshin-network
+    # API服务（端口8080）
+  genshin-chat-api:
+    build:
+      context: ../  # 构建上下文为项目根目录
+      dockerfile: ./genshin-chat-api/Dockerfile  # 指定API服务的Dockerfile路径
+    container_name: genshin-chat-api  # 容器名称
+    depends_on:
+      - mysql
+      - redis
+      - elasticsearch
+    ports:
+      - "8080:8080"  # 宿主机端口:容器内端口
+    restart: unless-stopped  # 容器退出时除非手动停止，否则自动重启
+    networks:
+      - genshin-network  # 加入自定义网络，便于服务间通信
+
+  # Server服务（端口8082）
+  genshin-chat-server:
+    build:
+      context: .
+      dockerfile: ./genshin-chat-server/Dockerfile  # 指定Server服务的Dockerfile路径
+    container_name: genshin-chat-server
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    networks:
+      - genshin-network
+    depends_on:
+      - genshin-chat-api  # 可选：指定依赖关系，确保API服务先启动
+      - mysql
+      - redis
+      - elasticsearch
+# 自定义网络（隔离性更好）
+networks:
+  genshin-network:
+    driver: bridge
 volumes:
   redis_conf:
   redis_data:

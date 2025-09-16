@@ -16,13 +16,6 @@
             <artifactId>genshin-chat-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.homework</groupId>
-            <artifactId>genshin-chat-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
