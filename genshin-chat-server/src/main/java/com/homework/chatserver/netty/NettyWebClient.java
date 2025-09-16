@@ -33,8 +33,8 @@ import static com.homework.chatserver.netty.NettyChannelHandlerInitializer.MAX_W
 @Slf4j
 public class NettyWebClient {
     @SneakyThrows
-    public void startConnect(){
-        URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=1234");
+    public void startConnect(String id){
+        URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=" + id);
 
         WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(
                 uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders());

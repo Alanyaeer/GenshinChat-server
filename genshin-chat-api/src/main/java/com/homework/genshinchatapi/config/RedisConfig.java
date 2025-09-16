@@ -57,7 +57,6 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-
     /**
      * 基于Hessian的Redis序列化器
      *

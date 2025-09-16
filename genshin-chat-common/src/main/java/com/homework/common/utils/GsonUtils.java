@@ -1,4 +1,4 @@
-package com.homework.genshinchatapi.utils;
+package com.homework.common.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

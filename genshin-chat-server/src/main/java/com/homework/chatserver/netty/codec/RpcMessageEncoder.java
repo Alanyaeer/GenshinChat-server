@@ -3,7 +3,7 @@ package com.homework.chatserver.netty.codec;
 import com.homework.chatserver.compress.Compress;
 import com.homework.chatserver.context.SpringContextHolder;
 import com.homework.chatserver.serialize.Serialization;
-import com.homework.chatserver.utils.idgenerator.IdGenerator;
+import com.homework.chatserver.utils.idGenerator.IdGenerator;
 import com.homework.common.entity.constants.RpcConstants;
 import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;

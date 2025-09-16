@@ -1,4 +1,4 @@
-package com.homework.chatserver.utils.idgenerator;
+package com.homework.chatserver.utils.idGenerator;
 
 /**
  * @author 嘉豪舞团-吴嘉豪

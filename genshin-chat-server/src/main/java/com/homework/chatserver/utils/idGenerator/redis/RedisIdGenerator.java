@@ -1,6 +1,6 @@
-package com.homework.chatserver.utils.idgenerator.redis;
+package com.homework.chatserver.utils.idGenerator.redis;
 
-import com.homework.chatserver.utils.idgenerator.IdGenerator;
+import com.homework.chatserver.utils.idGenerator.IdGenerator;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;

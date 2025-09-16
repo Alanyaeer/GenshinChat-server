@@ -1,7 +1,7 @@
-package com.homework.chatserver.utils.idgenerator.snowflake;
+package com.homework.chatserver.utils.idGenerator.snowflake;
 
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
-import com.homework.chatserver.utils.idgenerator.IdGenerator;
+import com.homework.chatserver.utils.idGenerator.IdGenerator;
 import org.springframework.stereotype.Component;
 
 /**

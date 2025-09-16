@@ -1,7 +1,7 @@
 package com.homework.chatserver.serialize.json;
 
 import com.homework.chatserver.serialize.Serialization;
-import com.homework.genshinchatapi.utils.GsonUtils;
+import com.homework.common.utils.GsonUtils;
 import org.springframework.stereotype.Component;
 
 /**

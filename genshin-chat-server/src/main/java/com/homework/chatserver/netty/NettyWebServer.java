@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,7 +53,7 @@ public class NettyWebServer implements CommandLineRunner {
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new NettyChannelHandlerInitializer(eventExecutors));
             ChannelFuture channelFuture = serverBootstrap.bind(PORT).sync();
-            nettyWebClient.startConnect();
+            nettyWebClient.startConnect("333");
             channelFuture.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();

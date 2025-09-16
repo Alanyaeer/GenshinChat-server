@@ -1,6 +1,6 @@
 package com.homework.chatserver.netty.handler;
 
-import com.homework.genshinchatapi.utils.FileUtils;
+import com.homework.common.utils.FileUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
