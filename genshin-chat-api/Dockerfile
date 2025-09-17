@@ -2,22 +2,31 @@
 FROM maven:3.8.5-openjdk-17 AS builder
 
 # 容器内工作目录
-WORKDIR /app
+WORKDIR /build
 
-# 复制项目根目录的pom.xml（父pom）
+# 复制Maven配置文件
+COPY settings.xml /usr/share/maven/conf/settings.xml
+
+# 先复制父pom.xml，利用Docker缓存
 COPY pom.xml .
 
-# 复制公共模块
+# 复制公共模块的pom.xml
+COPY genshin-chat-common/pom.xml ./genshin-chat-common/
+COPY genshin-chat-api/pom.xml ./genshin-chat-api/
+COPY genshin-chat-server/pom.xml ./genshin-chat-server/
+
+# 下载依赖（利用缓存，依赖不变时不会重新下载）
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B dependency:go-offline -pl genshin-chat-api -am
+
+# 复制源代码
 COPY genshin-chat-common/ ./genshin-chat-common/
-
-# 复制当前服务模块（genshin-chat-api）
 COPY genshin-chat-api/ ./genshin-chat-api/
-
 COPY genshin-chat-server/ ./genshin-chat-server/
 
-# 编译打包api模块及其依赖（包括common）
-# -pl 指定构建api模块，-am 自动构建依赖的common模块
-RUN mvn clean package -DskipTests -pl genshin-chat-api -am
+# 编译打包
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -T 1C clean package -DskipTests -pl genshin-chat-api -am
 
 # 运行阶段
 FROM openjdk:17.0.1-jdk-slim
@@ -25,7 +34,7 @@ FROM openjdk:17.0.1-jdk-slim
 WORKDIR /app
 
 # 从构建阶段复制打包好的jar
-COPY --from=builder /app/genshin-chat-api/target/*.jar api-service.jar
+COPY --from=builder /build/genshin-chat-api/target/*.jar api-service.jar
 
 # 暴露api服务端口（8080）
 EXPOSE 8080
