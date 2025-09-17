@@ -34,7 +34,7 @@ FROM openjdk:17.0.1-jdk-slim
 WORKDIR /app
 
 # 从构建阶段复制打包好的jar
-COPY --from=builder /build/genshin-chat-api/target/*.jar api-service.jar
+COPY --from=builder /build/genshin-chat-server/target/*.jar api-service.jar
 
 # 暴露api服务端口（8080）
 EXPOSE 8082
