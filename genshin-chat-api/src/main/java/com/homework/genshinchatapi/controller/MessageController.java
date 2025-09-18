@@ -48,7 +48,7 @@ import static java.lang.Math.abs;
  */
 @RestController
 @Slf4j
-@RequestMapping("/friend")
+@RequestMapping("/api/friend")
 @Api(tags = "聊天相关操作")
 public class MessageController {
     /**
