@@ -1,0 +1,7 @@
+mysql:
+  host: mysql
+  port: 3306
+redis:
+  host: redis
+es:
+  host: elasticsearch

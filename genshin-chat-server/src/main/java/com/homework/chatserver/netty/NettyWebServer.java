@@ -21,8 +21,6 @@ import java.util.concurrent.Executors;
 @Component
 @Slf4j
 public class NettyWebServer implements CommandLineRunner {
-    @Resource
-    private NettyWebClient nettyWebClient;
 
     public static final int PORT = 8081;
 

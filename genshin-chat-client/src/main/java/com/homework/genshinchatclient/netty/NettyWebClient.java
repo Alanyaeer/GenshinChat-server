@@ -1,29 +1,34 @@
-package com.homework.chatserver.netty;
+package com.homework.genshinchatclient.netty;
 
-import com.homework.chatserver.netty.codec.RpcMessageDecoder;
-import com.homework.chatserver.netty.codec.RpcMessageEncoder;
+
 import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.TextMessage;
+import com.homework.genshinchatclient.netty.codec.RpcMessageDecoder;
+import com.homework.genshinchatclient.netty.codec.RpcMessageEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
-import static com.homework.chatserver.netty.NettyChannelHandlerInitializer.MAX_HTTP_CONTENT_LENGTH;
-import static com.homework.chatserver.netty.NettyChannelHandlerInitializer.MAX_WEBSOCKET_CONTENT_LENGTH;
+import static com.homework.genshinchatclient.netty.NettyChannelHandlerInitializer.MAX_HTTP_CONTENT_LENGTH;
+import static com.homework.genshinchatclient.netty.NettyChannelHandlerInitializer.MAX_WEBSOCKET_CONTENT_LENGTH;
 
 /**
  * @author 嘉豪舞团-吴嘉豪
@@ -31,7 +36,7 @@ import static com.homework.chatserver.netty.NettyChannelHandlerInitializer.MAX_W
  */
 @Component
 @Slf4j
-public class NettyWebClient {
+public class NettyWebClient implements CommandLineRunner {
     @SneakyThrows
     public void startConnect(String id){
         URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=" + id);
@@ -73,15 +78,23 @@ public class NettyWebClient {
                     .messageType(MessageTypeEnum.TEXT.getCode())
                     .build();
             log.info(textMessage.toString());
-            while(channel.isActive()){
+            while(true){
                 channel.writeAndFlush(textMessage);
                 Thread.sleep(1000);
             }
-            channel.closeFuture().sync();
+//            channel.closeFuture().sync();
         } finally {
             workGroup.shutdownGracefully();
         }
     }
+
+    @Override
+    public void run(String... args) throws Exception {
+        new Thread(()-> {
+            startConnect("1");
+        }).start();
+    }
+
     public static class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
 
         private final WebSocketClientHandshaker handshaker;
