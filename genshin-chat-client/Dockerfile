@@ -20,7 +20,7 @@ COPY genshin-chat-client/pom.xml ./genshin-chat-client/
 
 # 下载依赖（利用缓存，依赖不变时不会重新下载）
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B dependency:go-offline -pl genshin-chat-api -am
+    mvn -B dependency:go-offline -pl genshin-chat-client -am
 
 # 复制源代码
 COPY genshin-chat-common/ ./genshin-chat-common/
@@ -31,7 +31,7 @@ COPY genshin-chat-client/ ./genshin-chat-client/
 
 # 编译打包
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B -T 1C clean package -DskipTests -pl genshin-chat-api -am
+    mvn -B -T 1C clean package -DskipTests -pl genshin-chat-client -am
 
 # 运行阶段
 FROM openjdk:17.0.1-jdk-slim
@@ -42,7 +42,7 @@ WORKDIR /app
 COPY --from=builder /build/genshin-chat-server/target/*.jar api-service.jar
 
 # 暴露api服务端口（8080）
-EXPOSE 8080
+EXPOSE 8083
 
 # 启动命令（指定端口）
-ENTRYPOINT ["java", "-jar", "api-service.jar", "--server.port=8080"]
+ENTRYPOINT ["java", "-jar", "api-service.jar", "--server.port=8083"]

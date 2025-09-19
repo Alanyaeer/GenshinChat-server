@@ -12,8 +12,11 @@ COPY pom.xml .
 
 # 复制公共模块的pom.xml
 COPY genshin-chat-common/pom.xml ./genshin-chat-common/
-COPY genshin-chat-api/pom.xml ./genshin-chat-api/
 COPY genshin-chat-server/pom.xml ./genshin-chat-server/
+COPY genshin-chat-core/pom.xml ./genshin-chat-core/
+COPY genshin-chat-api/pom.xml ./genshin-chat-api/
+COPY genshin-chat-client/pom.xml ./genshin-chat-client/
+
 
 # 下载依赖（利用缓存，依赖不变时不会重新下载）
 RUN --mount=type=cache,target=/root/.m2/repository \
@@ -21,8 +24,10 @@ RUN --mount=type=cache,target=/root/.m2/repository \
 
 # 复制源代码
 COPY genshin-chat-common/ ./genshin-chat-common/
-COPY genshin-chat-api/ ./genshin-chat-api/
 COPY genshin-chat-server/ ./genshin-chat-server/
+COPY genshin-chat-core/ ./genshin-chat-core/
+COPY genshin-chat-api/ ./genshin-chat-api/
+COPY genshin-chat-client/ ./genshin-chat-client/
 
 # 编译打包
 RUN --mount=type=cache,target=/root/.m2/repository \

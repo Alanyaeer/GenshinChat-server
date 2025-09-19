@@ -34,6 +34,7 @@
         <module>genshin-chat-api</module>
         <module>genshin-chat-common</module>
         <module>genshin-chat-server</module>
+        <module>genshin-chat-core</module>
         <module>genshin-chat-client</module>
     </modules>
 
