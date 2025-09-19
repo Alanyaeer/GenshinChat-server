@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket聊天测试工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .message-in {
+                animation: fadeInLeft 0.3s ease forwards;
+            }
+            .message-out {
+                animation: fadeInRight 0.3s ease forwards;
+            }
+            @keyframes fadeInLeft {
+                from {
+                    opacity: 0;
+                    transform: translateX(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            @keyframes fadeInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div class="max-w-4xl mx-auto p-4 md:p-6">
+    <header class="mb-6">
+        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark flex items-center">
+            <i class="fa fa-comments text-primary mr-3"></i>
+            WebSocket聊天测试工具
+        </h1>
+        <p class="text-gray-600">用于测试 ws://localhost:8081/v2/im/server 聊天服务</p>
+    </header>
+
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- 连接设置区域 -->
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label for="wsUrl" class="block text-sm font-medium text-gray-700 mb-1">WebSocket URL</label>
+                    <div class="flex">
+                        <input
+                                type="text"
+                                id="wsUrl"
+                                value="ws://localhost:8081/v2/im/server"
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                        >
+                    </div>
+                </div>
+                <div class="w-full md:w-48">
+                    <label for="myId" class="block text-sm font-medium text-gray-700 mb-1">我的ID (myId)</label>
+                    <input
+                            type="text"
+                            id="myId"
+                            placeholder="输入你的ID"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                    >
+                </div>
+                <div class="flex items-end">
+                    <button
+                            id="connectBtn"
+                            class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-all flex items-center"
+                    >
+                        <i class="fa fa-plug mr-2"></i> 连接
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-3 flex items-center">
+                <div id="connectionStatus" class="flex items-center text-gray-500 text-sm">
+                    <span class="inline-block w-2 h-2 rounded-full bg-gray-400 mr-2"></span>
+                    未连接
+                </div>
+                <button
+                        id="disconnectBtn"
+                        class="ml-4 text-gray-600 hover:text-red-600 px-3 py-1 rounded text-sm hidden"
+                >
+                    <i class="fa fa-unplug mr-1"></i> 断开连接
+                </button>
+            </div>
+        </div>
+
+        <!-- 聊天区域 -->
+        <div class="flex flex-col h-[500px]">
+            <!-- 聊天消息区域 -->
+            <div id="messageContainer" class="flex-1 p-4 overflow-y-auto scrollbar-hide space-y-4">
+                <div class="text-center text-gray-500 text-sm italic">
+                    连接后将显示聊天消息...
+                </div>
+            </div>
+
+            <!-- 分隔线 -->
+            <div class="border-t border-gray-200"></div>
+
+            <!-- 发送消息区域 -->
+            <div class="p-4">
+                <div class="mb-3">
+                    <label for="targetId" class="block text-sm font-medium text-gray-700 mb-1">目标ID (接收者/群ID)</label>
+                    <input
+                            type="text"
+                            id="targetId"
+                            placeholder="输入接收者ID"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                    >
+                </div>
+                <div class="flex flex-col md:flex-row gap-3">
+                        <textarea
+                                id="messageInput"
+                                placeholder="输入消息内容..."
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none"
+                                rows="3"
+                        ></textarea>
+                    <div class="flex flex-col gap-2">
+                        <button
+                                id="sendBtn"
+                                class="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled
+                        >
+                            <i class="fa fa-paper-plane mr-2"></i> 发送
+                        </button>
+                        <button
+                                id="clearBtn"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition-all text-sm"
+                        >
+                            <i class="fa fa-trash mr-1"></i> 清空
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日志区域 -->
+    <div class="mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="font-semibold text-gray-800 flex items-center">
+                <i class="fa fa-history text-gray-500 mr-2"></i> 连接日志
+            </h2>
+        </div>
+        <div id="logContainer" class="p-4 h-40 overflow-y-auto text-sm text-gray-700 font-mono bg-gray-50">
+            <div class="text-gray-500 italic">日志将显示在这里...</div>
+        </div>
+    </div>
+
+    <footer class="mt-8 text-center text-gray-500 text-sm">
+        <p>WebSocket聊天测试工具 &copy; 2023</p>
+    </footer>
+</div>
+
+<script>
+    // DOM元素
+    const wsUrlInput = document.getElementById('wsUrl');
+    const myIdInput = document.getElementById('myId');
+    const targetIdInput = document.getElementById('targetId');
+    const messageInput = document.getElementById('messageInput');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const messageContainer = document.getElementById('messageContainer');
+    const logContainer = document.getElementById('logContainer');
+    const connectionStatus = document.getElementById('connectionStatus');
+
+    // WebSocket实例
+    let ws = null;
+    let isConnected = false;
+
+    // 连接WebSocket
+    connectBtn.addEventListener('click', connectWebSocket);
+    // 断开连接
+    disconnectBtn.addEventListener('click', disconnectWebSocket);
+    // 发送消息
+    sendBtn.addEventListener('click', sendMessage);
+    // 清空消息输入
+    clearBtn.addEventListener('click', () => {
+        messageInput.value = '';
+        messageInput.focus();
+    });
+    // 按Enter发送消息(Shift+Enter换行)
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // 连接WebSocket函数
+    function connectWebSocket() {
+        const wsUrl = wsUrlInput.value.trim();
+        const myId = myIdInput.value.trim();
+
+        if (!wsUrl) {
+            showLog('错误: WebSocket URL不能为空', 'error');
+            return;
+        }
+
+        if (!myId) {
+            showLog('错误: 请输入我的ID (myId)', 'error');
+            return;
+        }
+
+        // 构建完整的URL(包含myId参数)
+        const fullUrl = wsUrl + (wsUrl.includes('?') ? '&' : '?') + `myId=${encodeURIComponent(myId)}`;
+
+        // 关闭已有的连接
+        if (ws) {
+            ws.close();
+        }
+
+        try {
+            ws = new WebSocket(fullUrl);
+
+            // 连接成功
+            ws.onopen = () => {
+                isConnected = true;
+                updateConnectionStatus(true);
+                showLog(`已连接到: ${fullUrl}`, 'success');
+
+                // 启用发送按钮
+                sendBtn.disabled = false;
+                messageInput.focus();
+            };
+
+            // 接收消息
+            ws.onmessage = (event) => {
+                try {
+                    const message = event.data;
+                    showLog(`收到消息: ${message}`, 'info');
+                    displayMessage(message, false);
+                } catch (error) {
+                    showLog(`解析消息错误: ${error.message}`, 'error');
+                    displayMessage(`[解析错误] ${event.data}`, false, true);
+                }
+            };
+
+            // 连接关闭
+            ws.onclose = (event) => {
+                isConnected = false;
+                updateConnectionStatus(false);
+                sendBtn.disabled = true;
+
+                if (event.wasClean) {
+                    showLog(`连接已关闭 (代码: ${event.code})`, 'info');
+                } else {
+                    showLog(`连接意外关闭 (代码: ${event.code})`, 'warning');
+                }
+            };
+
+            // 连接错误
+            ws.onerror = (error) => {
+                showLog(`连接错误: ${error.message || '未知错误'}`, 'error');
+            };
+        } catch (error) {
+            showLog(`连接失败: ${error.message}`, 'error');
+            updateConnectionStatus(false);
+        }
+    }
+
+    // 断开连接函数
+    function disconnectWebSocket() {
+        if (ws) {
+            ws.close(1000, '主动断开连接');
+            ws = null;
+        }
+    }
+
+    // 发送消息函数
+    function sendMessage() {
+        if (!isConnected || !ws) {
+            showLog('未连接到服务器，无法发送消息', 'error');
+            return;
+        }
+
+        const targetId = targetIdInput.value.trim();
+        const messageText = messageInput.value.trim();
+
+        if (!targetId) {
+            showLog('请输入目标ID (接收者/群ID)', 'error');
+            return;
+        }
+
+        if (!messageText) {
+            showLog('消息内容不能为空', 'error');
+            return;
+        }
+
+        try {
+            // 构建消息对象
+            const message = {
+                fromUserId: myIdInput.value.trim(),
+                targetId: targetId,
+                text: messageText,
+                msgType: 1, // 1表示文本消息
+                sendTime: new Date().toISOString()
+            };
+
+            const messageJson = JSON.stringify(message);
+            ws.send(messageJson);
+            showLog(`已发送消息: ${messageJson}`, 'info');
+
+            // 在消息区域显示自己发送的消息
+            displayMessage(messageJson, true);
+
+            // 清空输入框
+            messageInput.value = '';
+        } catch (error) {
+            showLog(`发送消息错误: ${error.message}`, 'error');
+        }
+    }
+
+    // 显示消息到聊天区域
+    function displayMessage(message, isOutgoing, isError = false) {
+        // 尝试解析消息为JSON
+        let messageObj;
+        let messageText = message;
+
+        try {
+            messageObj = JSON.parse(message);
+            // 根据消息对象构造显示文本
+            if (messageObj.text) {
+                messageText = messageObj.text;
+            }
+        } catch (e) {
+            // 不是JSON格式，直接显示原始文本
+        }
+
+        // 创建消息元素
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex ${isOutgoing ? 'justify-end' : 'justify-start'}`;
+
+        const messageBubble = document.createElement('div');
+        const bubbleClasses = `max-w-[80%] px-4 py-2 rounded-lg ${
+            isOutgoing
+                ? 'bg-primary text-white message-out'
+                : 'bg-gray-200 text-gray-800 message-in'
+        } ${isError ? 'border-2 border-red-500' : ''}`;
+
+        messageBubble.className = bubbleClasses;
+
+        // 添加发送者信息
+        const senderDiv = document.createElement('div');
+        senderDiv.className = `text-xs mb-1 ${isOutgoing ? 'text-blue-100' : 'text-gray-500'}`;
+
+        if (messageObj && messageObj.fromUserId) {
+            senderDiv.textContent = isOutgoing ? `我` : messageObj.fromUserId;
+        } else {
+            senderDiv.textContent = isOutgoing ? `我` : '未知发送者';
+        }
+
+        // 添加消息内容
+        const contentDiv = document.createElement('div');
+        contentDiv.textContent = messageText;
+
+        // 添加时间
+        const timeDiv = document.createElement('div');
+        timeDiv.className = `text-xs mt-1 ${isOutgoing ? 'text-blue-100' : 'text-gray-500'} text-right`;
+        timeDiv.textContent = new Date().toLocaleTimeString();
+
+        // 组合消息元素
+        messageBubble.appendChild(senderDiv);
+        messageBubble.appendChild(contentDiv);
+        messageBubble.appendChild(timeDiv);
+        messageDiv.appendChild(messageBubble);
+
+        // 清空初始提示
+        if (messageContainer.querySelector('div.italic')) {
+            messageContainer.innerHTML = '';
+        }
+
+        // 添加到消息容器
+        messageContainer.appendChild(messageDiv);
+
+        // 滚动到底部
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    // 显示日志
+    function showLog(text, type = 'info') {
+        const logDiv = document.createElement('div');
+
+        // 根据日志类型设置样式
+        const typeClasses = {
+            info: 'text-gray-700',
+            success: 'text-green-700',
+            warning: 'text-yellow-700',
+            error: 'text-red-700',
+        };
+
+        // 添加时间戳
+        const time = new Date().toLocaleTimeString();
+        logDiv.innerHTML = `[${time}] <span class="${typeClasses[type] || typeClasses.info}">${text}</span>`;
+
+        // 清空初始提示
+        if (logContainer.querySelector('div.italic')) {
+            logContainer.innerHTML = '';
+        }
+
+        logContainer.appendChild(logDiv);
+
+        // 滚动到底部
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // 更新连接状态显示
+    function updateConnectionStatus(connected) {
+        if (connected) {
+            connectionStatus.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>已连接';
+            connectBtn.classList.add('hidden');
+            disconnectBtn.classList.remove('hidden');
+            wsUrlInput.disabled = true;
+            myIdInput.disabled = true;
+        } else {
+            connectionStatus.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-gray-400 mr-2"></span>未连接';
+            connectBtn.classList.remove('hidden');
+            disconnectBtn.classList.add('hidden');
+            wsUrlInput.disabled = false;
+            myIdInput.disabled = false;
+        }
+    }
+
+    // 页面加载时生成一个随机ID作为示例
+    window.addEventListener('load', () => {
+        if (!myIdInput.value) {
+            // 生成一个随机ID作为示例
+            myIdInput.value = 'user_' + Math.random().toString(36).substring(2, 10);
+        }
+    });
+</script>
+</body>
+</html>

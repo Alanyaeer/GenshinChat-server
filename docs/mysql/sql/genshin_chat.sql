@@ -89,4 +89,22 @@ CREATE TABLE `user_info`  (
   CONSTRAINT `user_info_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
+-- ----------------------------
+-- Table structure for chat_message
+-- ----------------------------
+DROP TABLE IF EXISTS `chat_message`;
+CREATE TABLE `chat_message` (
+                                `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '消息ID（主键，自增唯一）',
+                                `from_user_id` varchar(64) NOT NULL COMMENT '发送者用户ID（UUID格式，0表示系统）',
+                                `target_id` varchar(64) NOT NULL COMMENT '接收目标ID（单聊=用户UUID，群聊=群标识）',
+                                `target_type` tinyint unsigned NOT NULL COMMENT '目标类型：1=单聊（用户），2=群聊（群），3=广播', -- 核心区分字段
+                                `text` varchar(255) NOT NULL DEFAULT '' COMMENT '文本消息内容（非文本则为空）',
+                                `img_url` varchar(255) NOT NULL DEFAULT '' COMMENT '图片URL（非图片则为空）',
+                                `msg_type` tinyint unsigned NOT NULL COMMENT '消息类型：1=文本，2=图片',
+                                `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '消息发送时间',
+                                `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                PRIMARY KEY (`id`) USING BTREE,
+    -- 优化查询：按“目标类型+目标ID+时间”查询，覆盖单聊/群聊消息列表场景
+                                INDEX `idx_target_type_id_time` (`target_type`, `target_id`, `create_time`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='聊天消息表（适配UUID用户ID）';
 SET FOREIGN_KEY_CHECKS = 1;
