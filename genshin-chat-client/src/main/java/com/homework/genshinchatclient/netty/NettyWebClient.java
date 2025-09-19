@@ -42,7 +42,7 @@ import static com.homework.genshinchatclient.netty.NettyChannelHandlerInitialize
 @Slf4j
 public class NettyWebClient implements CommandLineRunner {
     @SneakyThrows
-    public void startConnect(String id){
+    public void startConnect(){
         IdGenerator snowFlakeIdGenerator = SpringContextHolder.getBean("snowFlakeIdGenerator", IdGenerator.class);
         long userId = snowFlakeIdGenerator.nextId();
         log.info("当前用户的id为 {}", userId);
@@ -101,7 +101,7 @@ public class NettyWebClient implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         new Thread(()-> {
-            startConnect("1");
+            startConnect();
         }).start();
     }
 
