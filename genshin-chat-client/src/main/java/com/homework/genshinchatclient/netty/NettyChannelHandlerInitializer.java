@@ -46,7 +46,6 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 .addLast(new WebSocketTextFrameToByteBufHandler())
                 .addLast(new RpcMessageEncoder())
                 .addLast(new RpcMessageDecoder())
-                .addLast(eventExecutors, new RpcMessageHandler())
                 .addLast(eventExecutors, new TextWebSocketHandler())
                 .addLast(eventExecutors, new BinaryWebSocketHandler())
                 ;

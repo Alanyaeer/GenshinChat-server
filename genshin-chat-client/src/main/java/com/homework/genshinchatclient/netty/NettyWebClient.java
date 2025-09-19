@@ -10,6 +10,7 @@ import com.homework.genshinchatclient.idGenerator.IdGenerator;
 import com.homework.genshinchatclient.netty.codec.RpcMessageDecoder;
 import com.homework.genshinchatclient.netty.codec.RpcMessageEncoder;
 import com.homework.genshinchatclient.netty.handler.client.ClientTestHandler;
+import com.homework.genshinchatclient.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -45,7 +46,7 @@ public class NettyWebClient implements CommandLineRunner {
         IdGenerator snowFlakeIdGenerator = SpringContextHolder.getBean("snowFlakeIdGenerator", IdGenerator.class);
         long userId = snowFlakeIdGenerator.nextId();
         log.info("当前用户的id为 {}", userId);
-        URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=" + id);
+        URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=" + userId);
         WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(
                 uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders());
         NioEventLoopGroup workGroup = new NioEventLoopGroup(1);
@@ -63,6 +64,7 @@ public class NettyWebClient implements CommandLineRunner {
                                     .addLast(new HttpObjectAggregator(MAX_HTTP_CONTENT_LENGTH))
                                     .addLast(new WebSocketFrameAggregator(MAX_WEBSOCKET_CONTENT_LENGTH))
                                     .addLast(new WebSocketClientHandler(handshaker))
+                                    .addLast(new WebSocketBinaryFrameToByteBufHandler())
                                     .addLast(new RpcMessageDecoder())
                                     .addLast(new RpcMessageEncoder())
                                     .addLast(new ClientTestHandler())
@@ -75,9 +77,9 @@ public class NettyWebClient implements CommandLineRunner {
             // 等待握手完成
             WebSocketClientHandler handler = channel.pipeline().get(WebSocketClientHandler.class);
             handler.handshakeFuture().sync();
-
+            int messageContent = 0;
             TextMessage textMessage = TextMessage.builder()
-                    .text("hello world")
+                    .text(String.valueOf(messageContent))
                     .userId(userId)
                     .toUserId(-1L)
                     .compressType(CompressTypeEnum.NONE.getCode())
@@ -87,9 +89,10 @@ public class NettyWebClient implements CommandLineRunner {
             log.info(textMessage.toString());
             while(true){
                 channel.writeAndFlush(textMessage);
+                textMessage.setText(String.valueOf(++messageContent));
                 Thread.sleep(5000);
+
             }
-//            channel.closeFuture().sync();
         } finally {
             workGroup.shutdownGracefully();
         }
@@ -150,6 +153,9 @@ public class NettyWebClient implements CommandLineRunner {
             } else if (msg instanceof CloseWebSocketFrame) {
                 log.info("连接关闭");
                 ch.close();
+            }
+            else if(msg instanceof BinaryWebSocketFrame binaryWebSocketFrame){
+                ctx.fireChannelRead(binaryWebSocketFrame.retain());
             }
         }
 
