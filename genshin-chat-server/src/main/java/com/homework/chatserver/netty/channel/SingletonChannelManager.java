@@ -2,6 +2,7 @@ package com.homework.chatserver.netty.channel;
 
 import io.netty.channel.Channel;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,5 +51,10 @@ public class SingletonChannelManager implements ChannelManager {
      */
     public Channel getChannel(String userId){
         return channelMap.get(userId);
+    }
+
+    @Override
+    public Map<String, Channel> getChannelMap() {
+        return channelMap;
     }
 }

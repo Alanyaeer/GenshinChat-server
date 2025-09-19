@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
+@ToString(callSuper = true)
 public class TextMessage extends BaseMessage implements Serializable {
     private String text;
     private Long userId;

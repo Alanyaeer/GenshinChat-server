@@ -2,6 +2,8 @@ package com.homework.chatserver.netty.channel;
 
 import io.netty.channel.Channel;
 
+import java.util.Map;
+
 public interface ChannelManager {
     /**
      * 注册通道
@@ -26,4 +28,11 @@ public interface ChannelManager {
      * @return {@link Channel }
      */
     Channel getChannel(String userId);
+
+    /**
+     * 获取所有频道
+     *
+     * @return {@link Channel } {@link [] }
+     */
+    Map<String, Channel> getChannelMap();
 }

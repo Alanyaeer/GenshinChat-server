@@ -5,8 +5,11 @@ import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.TextMessage;
+import com.homework.genshinchatclient.context.SpringContextHolder;
+import com.homework.genshinchatclient.idGenerator.IdGenerator;
 import com.homework.genshinchatclient.netty.codec.RpcMessageDecoder;
 import com.homework.genshinchatclient.netty.codec.RpcMessageEncoder;
+import com.homework.genshinchatclient.netty.handler.client.ClientTestHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -39,8 +42,10 @@ import static com.homework.genshinchatclient.netty.NettyChannelHandlerInitialize
 public class NettyWebClient implements CommandLineRunner {
     @SneakyThrows
     public void startConnect(String id){
+        IdGenerator snowFlakeIdGenerator = SpringContextHolder.getBean("snowFlakeIdGenerator", IdGenerator.class);
+        long userId = snowFlakeIdGenerator.nextId();
+        log.info("当前用户的id为 {}", userId);
         URI uri = URI.create("ws://localhost:8081/v2/im/server?myId=" + id);
-
         WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(
                 uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders());
         NioEventLoopGroup workGroup = new NioEventLoopGroup(1);
@@ -59,7 +64,9 @@ public class NettyWebClient implements CommandLineRunner {
                                     .addLast(new WebSocketFrameAggregator(MAX_WEBSOCKET_CONTENT_LENGTH))
                                     .addLast(new WebSocketClientHandler(handshaker))
                                     .addLast(new RpcMessageDecoder())
-                                    .addLast(new RpcMessageEncoder());
+                                    .addLast(new RpcMessageEncoder())
+                                    .addLast(new ClientTestHandler())
+                            ;
                         }
                     });
             ChannelFuture channelFuture = bootstrap.connect(uri.getHost(), uri.getPort()).sync();
@@ -71,8 +78,8 @@ public class NettyWebClient implements CommandLineRunner {
 
             TextMessage textMessage = TextMessage.builder()
                     .text("hello world")
-                    .userId(1332L)
-                    .toUserId(3224L)
+                    .userId(userId)
+                    .toUserId(-1L)
                     .compressType(CompressTypeEnum.NONE.getCode())
                     .codecType(SerializationTypeEnum.PROTOSTUFF.getCode())
                     .messageType(MessageTypeEnum.TEXT.getCode())
@@ -80,7 +87,7 @@ public class NettyWebClient implements CommandLineRunner {
             log.info(textMessage.toString());
             while(true){
                 channel.writeAndFlush(textMessage);
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             }
 //            channel.closeFuture().sync();
         } finally {
