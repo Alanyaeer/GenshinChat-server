@@ -1,7 +1,7 @@
 package com.homework.chatserver.netty.handler;
 
-import com.homework.chatserver.netty.channel.ChannelContext;
 import com.homework.common.entity.rpc.message.PingMessage;
+import com.homework.genshinchatcore.netty.channel.ChannelContext;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

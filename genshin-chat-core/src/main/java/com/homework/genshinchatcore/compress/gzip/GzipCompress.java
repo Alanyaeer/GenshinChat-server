@@ -1,6 +1,6 @@
 package com.homework.genshinchatcore.compress.gzip;
 
-import com.homework.chatserver.compress.Compress;
+import com.homework.genshinchatcore.compress.Compress;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;

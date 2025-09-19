@@ -1,6 +1,6 @@
 package com.homework.genshinchatcore.compress.none;
 
-import com.homework.chatserver.compress.Compress;
+import com.homework.genshinchatcore.compress.Compress;
 import org.springframework.stereotype.Component;
 
 /**

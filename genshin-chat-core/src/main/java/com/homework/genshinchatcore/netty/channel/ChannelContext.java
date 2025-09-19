@@ -1,7 +1,5 @@
 package com.homework.genshinchatcore.netty.channel;
 
-import com.homework.chatserver.netty.channel.ChannelManager;
-import com.homework.chatserver.netty.channel.SingletonChannelManager;
 
 public class ChannelContext {
     private static ChannelManager defaultChannel;

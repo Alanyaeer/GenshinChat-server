@@ -17,20 +17,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
-            <version>${kryo.version}</version>
-        </dependency>
-        <!-- protostuff -->
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-core</artifactId>
-            <version>${protostuff.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-runtime</artifactId>
-            <version>${protostuff.version}</version>
+            <groupId>com.homework</groupId>
+            <artifactId>genshin-chat-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

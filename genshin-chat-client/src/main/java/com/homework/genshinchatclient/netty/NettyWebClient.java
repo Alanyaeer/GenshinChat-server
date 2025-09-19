@@ -5,12 +5,12 @@ import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.TextMessage;
-import com.homework.genshinchatclient.context.SpringContextHolder;
-import com.homework.genshinchatclient.idGenerator.IdGenerator;
 import com.homework.genshinchatclient.netty.codec.RpcMessageDecoder;
 import com.homework.genshinchatclient.netty.codec.RpcMessageEncoder;
-import com.homework.genshinchatclient.netty.handler.client.ClientTestHandler;
+import com.homework.genshinchatclient.netty.handler.client.ClientRpcInboundMessageHandler;
 import com.homework.genshinchatclient.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
+import com.homework.genshinchatcore.context.SpringContextHolder;
+import com.homework.genshinchatcore.idGenerator.IdGenerator;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -67,7 +67,7 @@ public class NettyWebClient implements CommandLineRunner {
                                     .addLast(new WebSocketBinaryFrameToByteBufHandler())
                                     .addLast(new RpcMessageDecoder())
                                     .addLast(new RpcMessageEncoder())
-                                    .addLast(new ClientTestHandler())
+                                    .addLast(new ClientRpcInboundMessageHandler())
                             ;
                         }
                     });

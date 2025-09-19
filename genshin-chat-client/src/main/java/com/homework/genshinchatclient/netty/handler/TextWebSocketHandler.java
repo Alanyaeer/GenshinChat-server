@@ -2,7 +2,7 @@ package com.homework.genshinchatclient.netty.handler;
 
 import com.homework.common.entity.bo.TextMessageBO;
 import com.homework.common.utils.GsonUtils;
-import com.homework.genshinchatclient.netty.channel.ChannelContext;
+import com.homework.genshinchatcore.netty.channel.ChannelContext;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

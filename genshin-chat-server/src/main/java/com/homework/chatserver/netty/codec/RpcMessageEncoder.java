@@ -1,14 +1,14 @@
 package com.homework.chatserver.netty.codec;
 
-import com.homework.chatserver.compress.Compress;
-import com.homework.chatserver.context.SpringContextHolder;
-import com.homework.chatserver.serialize.Serialization;
-import com.homework.chatserver.utils.idGenerator.IdGenerator;
 import com.homework.common.entity.constants.RpcConstants;
 import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.BaseMessage;
 import com.homework.common.utils.hash.MurMurHash;
+import com.homework.genshinchatcore.compress.Compress;
+import com.homework.genshinchatcore.context.SpringContextHolder;
+import com.homework.genshinchatcore.idGenerator.IdGenerator;
+import com.homework.genshinchatcore.serializer.Serialization;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
