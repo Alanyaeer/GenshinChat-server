@@ -73,7 +73,10 @@ public class NettyWebClient {
                     .messageType(MessageTypeEnum.TEXT.getCode())
                     .build();
             log.info(textMessage.toString());
-            channel.writeAndFlush(textMessage);
+            while(channel.isActive()){
+                channel.writeAndFlush(textMessage);
+                Thread.sleep(1000);
+            }
             channel.closeFuture().sync();
         } finally {
             workGroup.shutdownGracefully();

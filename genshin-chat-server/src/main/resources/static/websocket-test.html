@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket聊天测试工具</title>
+    <title>GenshinChat WebSocket测试工具</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -11,8 +11,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3B82F6',
-                        secondary: '#10B981',
+                        primary: '#7C3AED', // 原神紫色调
+                        secondary: '#EC4899',
                         dark: '#1E293B',
                         light: '#F8FAFC'
                     },
@@ -29,142 +29,150 @@
                 content-visibility: auto;
             }
             .scrollbar-hide {
-                -ms-overflow-style: none;
                 scrollbar-width: none;
+                -ms-overflow-style: none;
             }
             .scrollbar-hide::-webkit-scrollbar {
                 display: none;
             }
-            .message-in {
-                animation: fadeInLeft 0.3s ease forwards;
-            }
-            .message-out {
-                animation: fadeInRight 0.3s ease forwards;
-            }
-            @keyframes fadeInLeft {
-                from {
-                    opacity: 0;
-                    transform: translateX(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-            @keyframes fadeInRight {
-                from {
-                    opacity: 0;
-                    transform: translateX(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
+            .shadow-glow {
+                box-shadow: 0 0 15px rgba(124, 58, 237, 0.5);
             }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-<div class="max-w-4xl mx-auto p-4 md:p-6">
-    <header class="mb-6">
-        <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark flex items-center">
-            <i class="fa fa-comments text-primary mr-3"></i>
-            WebSocket聊天测试工具
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <header class="mb-8 text-center">
+        <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-primary mb-2 flex items-center justify-center">
+            <i class="fa fa-comments-o mr-3" aria-hidden="true"></i>
+            GenshinChat WebSocket测试工具
         </h1>
-        <p class="text-gray-600">用于测试 ws://localhost:8081/v2/im/server 聊天服务</p>
+        <p class="text-gray-600">测试WebSocket消息发送与心跳功能</p>
     </header>
 
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <!-- 连接设置区域 -->
-        <div class="p-4 bg-gray-50 border-b border-gray-200">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                    <label for="wsUrl" class="block text-sm font-medium text-gray-700 mb-1">WebSocket URL</label>
-                    <div class="flex">
-                        <input
-                                type="text"
-                                id="wsUrl"
-                                value="ws://localhost:8081/v2/im/server"
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        >
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- 连接设置面板 -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-glow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fa fa-cogs text-primary mr-2"></i>连接设置
+                </h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="wsUrl" class="block text-sm font-medium text-gray-700 mb-1">WebSocket地址</label>
+                        <div class="flex">
+                            <input type="text" id="wsUrl"
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                                   value="ws://localhost:8081/v2/im/server?myId=test123">
+                            <button id="connectBtn"
+                                    class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg transition-all">
+                                <i class="fa fa-plug mr-1"></i>连接
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="userId" class="block text-sm font-medium text-gray-700 mb-1">用户ID</label>
+                        <input type="text" id="userId"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               value="test123">
+                    </div>
+
+                    <div>
+                        <label for="targetUserId" class="block text-sm font-medium text-gray-700 mb-1">目标用户ID</label>
+                        <input type="text" id="targetUserId"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               value="333">
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="autoHeartbeat" checked
+                               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="autoHeartbeat" class="text-sm text-gray-700">自动发送心跳</label>
+                    </div>
+
+                    <div id="connectionStatus" class="flex items-center p-3 bg-gray-100 rounded-lg">
+                        <span id="statusIndicator" class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                        <span id="statusText" class="text-sm">未连接</span>
                     </div>
                 </div>
-                <div class="w-full md:w-48">
-                    <label for="myId" class="block text-sm font-medium text-gray-700 mb-1">我的ID (myId)</label>
-                    <input
-                            type="text"
-                            id="myId"
-                            placeholder="输入你的ID"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                    >
+            </div>
+
+            <!-- 消息类型设置 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-glow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fa fa-envelope-o text-primary mr-2"></i>消息设置
+                </h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">消息类型</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="textMessageBtn" class="bg-primary text-white px-3 py-2 rounded-lg transition-all">
+                                文本消息
+                            </button>
+                            <button id="heartbeatBtn" class="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-lg transition-all">
+                                心跳消息
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="compressType" class="block text-sm font-medium text-gray-700 mb-1">压缩类型</label>
+                        <select id="compressType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="0">无压缩</option>
+                            <option value="1">GZIP</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="codecType" class="block text-sm font-medium text-gray-700 mb-1">序列化类型</label>
+                        <select id="codecType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            <option value="0">PROTOSTUFF</option>
+                            <option value="1">JSON</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="flex items-end">
-                    <button
-                            id="connectBtn"
-                            class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-all flex items-center"
-                    >
-                        <i class="fa fa-plug mr-2"></i> 连接
+            </div>
+        </div>
+
+        <!-- 消息发送与接收区域 -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- 消息显示区域 -->
+            <div class="bg-white rounded-xl shadow-lg h-96 flex flex-col transition-all duration-300 hover:shadow-glow">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold flex items-center">
+                        <i class="fa fa-comments text-primary mr-2"></i>消息日志
+                    </h2>
+                    <button id="clearLogs" class="text-gray-500 hover:text-gray-700 transition-colors">
+                        <i class="fa fa-trash-o mr-1"></i>清空
                     </button>
                 </div>
-            </div>
 
-            <div class="mt-3 flex items-center">
-                <div id="connectionStatus" class="flex items-center text-gray-500 text-sm">
-                    <span class="inline-block w-2 h-2 rounded-full bg-gray-400 mr-2"></span>
-                    未连接
-                </div>
-                <button
-                        id="disconnectBtn"
-                        class="ml-4 text-gray-600 hover:text-red-600 px-3 py-1 rounded text-sm hidden"
-                >
-                    <i class="fa fa-unplug mr-1"></i> 断开连接
-                </button>
-            </div>
-        </div>
-
-        <!-- 聊天区域 -->
-        <div class="flex flex-col h-[500px]">
-            <!-- 聊天消息区域 -->
-            <div id="messageContainer" class="flex-1 p-4 overflow-y-auto scrollbar-hide space-y-4">
-                <div class="text-center text-gray-500 text-sm italic">
-                    连接后将显示聊天消息...
+                <div id="messageLogs" class="flex-1 p-4 overflow-y-auto scrollbar-hide space-y-4">
+                    <div class="text-gray-500 text-sm italic text-center">
+                        连接后将显示消息日志...
+                    </div>
                 </div>
             </div>
 
-            <!-- 分隔线 -->
-            <div class="border-t border-gray-200"></div>
+            <!-- 消息输入区域 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-glow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fa fa-pencil text-primary mr-2"></i>发送消息
+                </h2>
 
-            <!-- 发送消息区域 -->
-            <div class="p-4">
-                <div class="mb-3">
-                    <label for="targetId" class="block text-sm font-medium text-gray-700 mb-1">目标ID (接收者/群ID)</label>
-                    <input
-                            type="text"
-                            id="targetId"
-                            placeholder="输入接收者ID"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                    >
-                </div>
-                <div class="flex flex-col md:flex-row gap-3">
-                        <textarea
-                                id="messageInput"
-                                placeholder="输入消息内容..."
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none"
-                                rows="3"
-                        ></textarea>
-                    <div class="flex flex-col gap-2">
-                        <button
-                                id="sendBtn"
-                                class="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled
-                        >
-                            <i class="fa fa-paper-plane mr-2"></i> 发送
-                        </button>
-                        <button
-                                id="clearBtn"
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition-all text-sm"
-                        >
-                            <i class="fa fa-trash mr-1"></i> 清空
+                <div class="space-y-4">
+                        <textarea id="messageInput" rows="4"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none"
+                                  placeholder="输入要发送的消息..."></textarea>
+
+                    <div class="flex justify-end">
+                        <button id="sendBtn" disabled
+                                class="bg-gray-300 text-gray-500 cursor-not-allowed px-6 py-2 rounded-lg transition-all flex items-center">
+                            <i class="fa fa-paper-plane mr-2"></i>发送消息
                         </button>
                     </div>
                 </div>
@@ -172,300 +180,394 @@
         </div>
     </div>
 
-    <!-- 日志区域 -->
-    <div class="mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="p-4 bg-gray-50 border-b border-gray-200">
-            <h2 class="font-semibold text-gray-800 flex items-center">
-                <i class="fa fa-history text-gray-500 mr-2"></i> 连接日志
-            </h2>
-        </div>
-        <div id="logContainer" class="p-4 h-40 overflow-y-auto text-sm text-gray-700 font-mono bg-gray-50">
-            <div class="text-gray-500 italic">日志将显示在这里...</div>
-        </div>
-    </div>
-
-    <footer class="mt-8 text-center text-gray-500 text-sm">
-        <p>WebSocket聊天测试工具 &copy; 2023</p>
+    <footer class="mt-12 text-center text-gray-500 text-sm">
+        <p>基于GenshinChat项目的WebSocket测试工具 | 支持文本消息和心跳检测</p>
     </footer>
 </div>
 
 <script>
     // DOM元素
     const wsUrlInput = document.getElementById('wsUrl');
-    const myIdInput = document.getElementById('myId');
-    const targetIdInput = document.getElementById('targetId');
-    const messageInput = document.getElementById('messageInput');
     const connectBtn = document.getElementById('connectBtn');
-    const disconnectBtn = document.getElementById('disconnectBtn');
+    const userIdInput = document.getElementById('userId');
+    const targetUserIdInput = document.getElementById('targetUserId');
+    const autoHeartbeatCheckbox = document.getElementById('autoHeartbeat');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const messageLogs = document.getElementById('messageLogs');
+    const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const messageContainer = document.getElementById('messageContainer');
-    const logContainer = document.getElementById('logContainer');
-    const connectionStatus = document.getElementById('connectionStatus');
+    const clearLogsBtn = document.getElementById('clearLogs');
+    const textMessageBtn = document.getElementById('textMessageBtn');
+    const heartbeatBtn = document.getElementById('heartbeatBtn');
+    const compressTypeSelect = document.getElementById('compressType');
+    const codecTypeSelect = document.getElementById('codecType');
 
-    // WebSocket实例
-    let ws = null;
+    // 状态变量
+    let websocket = null;
     let isConnected = false;
+    let currentMessageType = 'text'; // 'text' 或 'heartbeat'
+    let heartbeatInterval = null;
 
-    // 连接WebSocket
-    connectBtn.addEventListener('click', connectWebSocket);
-    // 断开连接
-    disconnectBtn.addEventListener('click', disconnectWebSocket);
-    // 发送消息
-    sendBtn.addEventListener('click', sendMessage);
-    // 清空消息输入
-    clearBtn.addEventListener('click', () => {
-        messageInput.value = '';
-        messageInput.focus();
-    });
-    // 按Enter发送消息(Shift+Enter换行)
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
+    // 协议常量 (与后端保持一致)
+    const MESSAGE_TYPE = {
+        TEXT: 1,
+        PING: 2,
+        PONG: 3,
+        MEDIA: 4
+    };
+
+    const COMPRESS_TYPE = {
+        NONE: 0,
+        GZIP: 1
+    };
+
+    const CODEC_TYPE = {
+        PROTOSTUFF: 0,
+        JSON: 1
+    };
+
+    // 初始化事件监听
+    function initEventListeners() {
+        // 连接按钮
+        connectBtn.addEventListener('click', toggleConnection);
+
+        // 发送按钮
+        sendBtn.addEventListener('click', sendMessage);
+
+        // 清空日志
+        clearLogsBtn.addEventListener('click', clearLogs);
+
+        // 消息类型切换
+        textMessageBtn.addEventListener('click', () => setMessageType('text'));
+        heartbeatBtn.addEventListener('click', () => setMessageType('heartbeat'));
+
+        // 自动心跳切换
+        autoHeartbeatCheckbox.addEventListener('change', toggleAutoHeartbeat);
+
+        // 按Enter发送消息
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 用户ID变更时更新连接URL
+        userIdInput.addEventListener('input', updateWsUrlWithUserId);
+    }
+
+    // 更新WebSocket URL中的用户ID
+    function updateWsUrlWithUserId() {
+        const currentUrl = wsUrlInput.value;
+        const userId = userIdInput.value.trim();
+
+        if (!currentUrl || !userId) return;
+
+        // 解析并更新URL中的myId参数
+        try {
+            const url = new URL(currentUrl);
+            url.searchParams.set('myId', userId);
+            wsUrlInput.value = url.toString();
+        } catch (e) {
+            console.error('无法解析URL:', e);
         }
-    });
+    }
 
-    // 连接WebSocket函数
-    function connectWebSocket() {
-        const wsUrl = wsUrlInput.value.trim();
-        const myId = myIdInput.value.trim();
+    // 设置消息类型
+    function setMessageType(type) {
+        currentMessageType = type;
 
-        if (!wsUrl) {
-            showLog('错误: WebSocket URL不能为空', 'error');
+        if (type === 'text') {
+            textMessageBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+            textMessageBtn.classList.add('bg-primary', 'text-white');
+            heartbeatBtn.classList.remove('bg-primary', 'text-white');
+            heartbeatBtn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+            messageInput.disabled = false;
+            messageInput.placeholder = '输入要发送的消息...';
+        } else {
+            textMessageBtn.classList.remove('bg-primary', 'text-white');
+            textMessageBtn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+            heartbeatBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+            heartbeatBtn.classList.add('bg-primary', 'text-white');
+            messageInput.disabled = true;
+            messageInput.placeholder = '心跳消息不需要输入内容';
+        }
+    }
+
+    // 切换连接状态
+    function toggleConnection() {
+        if (isConnected) {
+            disconnect();
+        } else {
+            connect();
+        }
+    }
+
+    // 连接到WebSocket服务器
+    function connect() {
+        const url = wsUrlInput.value.trim();
+
+        if (!url) {
+            addLog('错误', '请输入WebSocket地址', 'error');
             return;
-        }
-
-        if (!myId) {
-            showLog('错误: 请输入我的ID (myId)', 'error');
-            return;
-        }
-
-        // 构建完整的URL(包含myId参数)
-        const fullUrl = wsUrl + (wsUrl.includes('?') ? '&' : '?') + `myId=${encodeURIComponent(myId)}`;
-
-        // 关闭已有的连接
-        if (ws) {
-            ws.close();
         }
 
         try {
-            ws = new WebSocket(fullUrl);
+            websocket = new WebSocket(url);
 
-            // 连接成功
-            ws.onopen = () => {
+            websocket.onopen = function() {
                 isConnected = true;
                 updateConnectionStatus(true);
-                showLog(`已连接到: ${fullUrl}`, 'success');
+                addLog('连接', `已连接到 ${url}`, 'success');
 
-                // 启用发送按钮
-                sendBtn.disabled = false;
-                messageInput.focus();
-            };
-
-            // 接收消息
-            ws.onmessage = (event) => {
-                try {
-                    const message = event.data;
-                    showLog(`收到消息: ${message}`, 'info');
-                    displayMessage(message, false);
-                } catch (error) {
-                    showLog(`解析消息错误: ${error.message}`, 'error');
-                    displayMessage(`[解析错误] ${event.data}`, false, true);
+                // 如果启用自动心跳，开始发送
+                if (autoHeartbeatCheckbox.checked) {
+                    startAutoHeartbeat();
                 }
             };
 
-            // 连接关闭
-            ws.onclose = (event) => {
+            websocket.onmessage = function(event) {
+                // 处理接收到的消息
+                handleReceivedMessage(event.data);
+            };
+
+            websocket.onerror = function(error) {
+                addLog('错误', `WebSocket错误: ${error}`, 'error');
+            };
+
+            websocket.onclose = function(event) {
                 isConnected = false;
                 updateConnectionStatus(false);
-                sendBtn.disabled = true;
-
-                if (event.wasClean) {
-                    showLog(`连接已关闭 (代码: ${event.code})`, 'info');
-                } else {
-                    showLog(`连接意外关闭 (代码: ${event.code})`, 'warning');
-                }
+                stopAutoHeartbeat();
+                addLog('断开', `连接已关闭 (代码: ${event.code}, 原因: ${event.reason})`, 'warning');
             };
-
-            // 连接错误
-            ws.onerror = (error) => {
-                showLog(`连接错误: ${error.message || '未知错误'}`, 'error');
-            };
-        } catch (error) {
-            showLog(`连接失败: ${error.message}`, 'error');
-            updateConnectionStatus(false);
+        } catch (e) {
+            addLog('错误', `连接失败: ${e.message}`, 'error');
         }
     }
 
-    // 断开连接函数
-    function disconnectWebSocket() {
-        if (ws) {
-            ws.close(1000, '主动断开连接');
-            ws = null;
+    // 断开连接
+    function disconnect() {
+        if (websocket) {
+            websocket.close(1000, '客户端主动断开');
+            websocket = null;
         }
     }
 
-    // 发送消息函数
+    // 发送消息
     function sendMessage() {
-        if (!isConnected || !ws) {
-            showLog('未连接到服务器，无法发送消息', 'error');
-            return;
-        }
-
-        const targetId = targetIdInput.value.trim();
-        const messageText = messageInput.value.trim();
-
-        if (!targetId) {
-            showLog('请输入目标ID (接收者/群ID)', 'error');
-            return;
-        }
-
-        if (!messageText) {
-            showLog('消息内容不能为空', 'error');
+        if (!isConnected || !websocket) {
+            addLog('错误', '未连接到服务器', 'error');
             return;
         }
 
         try {
-            // 构建消息对象
-            const message = {
-                fromUserId: myIdInput.value.trim(),
-                targetId: targetId,
-                text: messageText,
-                msgType: 1, // 1表示文本消息
-                sendTime: new Date().toISOString()
-            };
+            let message;
 
-            const messageJson = JSON.stringify(message);
-            ws.send(messageJson);
-            showLog(`已发送消息: ${messageJson}`, 'info');
+            if (currentMessageType === 'text') {
+                const text = messageInput.value.trim();
+                if (!text) {
+                    addLog('错误', '消息内容不能为空', 'error');
+                    return;
+                }
 
-            // 在消息区域显示自己发送的消息
-            displayMessage(messageJson, true);
+                // 创建文本消息
+                message = {
+                    text: text,
+                    userId: userIdInput.value.trim(),
+                    toUserId: targetUserIdInput.value.trim(),
+                    compressType: parseInt(compressTypeSelect.value),
+                    codecType: parseInt(codecTypeSelect.value),
+                    messageType: MESSAGE_TYPE.TEXT
+                };
 
-            // 清空输入框
-            messageInput.value = '';
-        } catch (error) {
-            showLog(`发送消息错误: ${error.message}`, 'error');
+                addLog('发送', `发送文本消息到 ${message.toUserId}: ${message.text}`, 'send');
+                messageInput.value = '';
+            } else {
+                // 创建心跳消息
+                message = {
+                    messageType: MESSAGE_TYPE.PING,
+                    compressType: COMPRESS_TYPE.NONE,
+                    codecType: CODEC_TYPE.JSON,
+                    userId: userIdInput.value.trim()
+                };
+
+                addLog('发送', '发送心跳消息', 'send');
+            }
+
+            // 发送消息 (实际项目中可能需要根据codecType进行序列化)
+            websocket.send(JSON.stringify(message));
+        } catch (e) {
+            addLog('错误', `发送消息失败: ${e.message}`, 'error');
         }
     }
 
-    // 显示消息到聊天区域
-    function displayMessage(message, isOutgoing, isError = false) {
-        // 尝试解析消息为JSON
-        let messageObj;
-        let messageText = message;
-
+    // 处理接收到的消息
+    function handleReceivedMessage(data) {
         try {
-            messageObj = JSON.parse(message);
-            // 根据消息对象构造显示文本
-            if (messageObj.text) {
-                messageText = messageObj.text;
+            const message = JSON.parse(data);
+
+            if (message.messageType === MESSAGE_TYPE.PING) {
+                addLog('接收', '收到Ping消息', 'receive');
+                // 如果收到Ping，自动回复Pong
+                const pongMessage = {
+                    messageType: MESSAGE_TYPE.PONG,
+                    compressType: COMPRESS_TYPE.NONE,
+                    codecType: CODEC_TYPE.JSON,
+                    userId: userIdInput.value.trim()
+                };
+                websocket.send(JSON.stringify(pongMessage));
+                addLog('发送', '自动回复Pong消息', 'send');
+            } else if (message.messageType === MESSAGE_TYPE.PONG) {
+                addLog('接收', '收到Pong消息', 'receive');
+            } else if (message.messageType === MESSAGE_TYPE.TEXT) {
+                addLog('接收', `收到来自 ${message.userId} 的消息: ${message.text}`, 'receive');
+            } else {
+                addLog('接收', `收到未知类型消息: ${JSON.stringify(message)}`, 'receive');
             }
         } catch (e) {
-            // 不是JSON格式，直接显示原始文本
+            addLog('接收', `收到原始消息: ${data}`, 'receive');
+            console.error('解析消息失败:', e);
         }
-
-        // 创建消息元素
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `flex ${isOutgoing ? 'justify-end' : 'justify-start'}`;
-
-        const messageBubble = document.createElement('div');
-        const bubbleClasses = `max-w-[80%] px-4 py-2 rounded-lg ${
-            isOutgoing
-                ? 'bg-primary text-white message-out'
-                : 'bg-gray-200 text-gray-800 message-in'
-        } ${isError ? 'border-2 border-red-500' : ''}`;
-
-        messageBubble.className = bubbleClasses;
-
-        // 添加发送者信息
-        const senderDiv = document.createElement('div');
-        senderDiv.className = `text-xs mb-1 ${isOutgoing ? 'text-blue-100' : 'text-gray-500'}`;
-
-        if (messageObj && messageObj.fromUserId) {
-            senderDiv.textContent = isOutgoing ? `我` : messageObj.fromUserId;
-        } else {
-            senderDiv.textContent = isOutgoing ? `我` : '未知发送者';
-        }
-
-        // 添加消息内容
-        const contentDiv = document.createElement('div');
-        contentDiv.textContent = messageText;
-
-        // 添加时间
-        const timeDiv = document.createElement('div');
-        timeDiv.className = `text-xs mt-1 ${isOutgoing ? 'text-blue-100' : 'text-gray-500'} text-right`;
-        timeDiv.textContent = new Date().toLocaleTimeString();
-
-        // 组合消息元素
-        messageBubble.appendChild(senderDiv);
-        messageBubble.appendChild(contentDiv);
-        messageBubble.appendChild(timeDiv);
-        messageDiv.appendChild(messageBubble);
-
-        // 清空初始提示
-        if (messageContainer.querySelector('div.italic')) {
-            messageContainer.innerHTML = '';
-        }
-
-        // 添加到消息容器
-        messageContainer.appendChild(messageDiv);
-
-        // 滚动到底部
-        messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
-    // 显示日志
-    function showLog(text, type = 'info') {
-        const logDiv = document.createElement('div');
+    // 添加日志
+    function addLog(type, content, logType = 'info') {
+        const logElement = document.createElement('div');
+        const timestamp = new Date().toLocaleTimeString();
 
-        // 根据日志类型设置样式
-        const typeClasses = {
-            info: 'text-gray-700',
-            success: 'text-green-700',
-            warning: 'text-yellow-700',
-            error: 'text-red-700',
-        };
+        let bgClass, iconClass;
 
-        // 添加时间戳
-        const time = new Date().toLocaleTimeString();
-        logDiv.innerHTML = `[${time}] <span class="${typeClasses[type] || typeClasses.info}">${text}</span>`;
-
-        // 清空初始提示
-        if (logContainer.querySelector('div.italic')) {
-            logContainer.innerHTML = '';
+        switch (logType) {
+            case 'success':
+                bgClass = 'bg-green-50 border-green-200';
+                iconClass = 'text-green-500';
+                break;
+            case 'error':
+                bgClass = 'bg-red-50 border-red-200';
+                iconClass = 'text-red-500';
+                break;
+            case 'warning':
+                bgClass = 'bg-yellow-50 border-yellow-200';
+                iconClass = 'text-yellow-500';
+                break;
+            case 'send':
+                bgClass = 'bg-blue-50 border-blue-200 ml-auto';
+                iconClass = 'text-blue-500';
+                break;
+            case 'receive':
+                bgClass = 'bg-purple-50 border-purple-200';
+                iconClass = 'text-purple-500';
+                break;
+            default:
+                bgClass = 'bg-gray-50 border-gray-200';
+                iconClass = 'text-gray-500';
         }
 
-        logContainer.appendChild(logDiv);
+        logElement.className = `p-3 rounded-lg border shadow-sm max-w-full ${bgClass} flex items-start`;
+        logElement.innerHTML = `
+                <i class="fa fa-${getIconForType(type)} ${iconClass} mt-1 mr-3"></i>
+                <div>
+                    <div class="text-xs text-gray-500">${timestamp}</div>
+                    <div class="text-sm">${content}</div>
+                </div>
+            `;
 
-        // 滚动到底部
-        logContainer.scrollTop = logContainer.scrollHeight;
+        // 清除"无消息"提示
+        if (messageLogs.querySelector('.italic')) {
+            messageLogs.innerHTML = '';
+        }
+
+        messageLogs.appendChild(logElement);
+        messageLogs.scrollTop = messageLogs.scrollHeight;
+    }
+
+    // 根据日志类型获取图标
+    function getIconForType(type) {
+        switch (type) {
+            case '连接': return 'plug';
+            case '断开': return 'unplug';
+            case '发送': return 'paper-plane-o';
+            case '接收': return 'inbox';
+            case '错误': return 'exclamation-circle';
+            default: return 'info-circle';
+        }
+    }
+
+    // 清空日志
+    function clearLogs() {
+        messageLogs.innerHTML = `
+                <div class="text-gray-500 text-sm italic text-center">
+                    消息日志已清空
+                </div>
+            `;
     }
 
     // 更新连接状态显示
     function updateConnectionStatus(connected) {
         if (connected) {
-            connectionStatus.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>已连接';
-            connectBtn.classList.add('hidden');
-            disconnectBtn.classList.remove('hidden');
-            wsUrlInput.disabled = true;
-            myIdInput.disabled = true;
+            statusIndicator.className = 'w-3 h-3 rounded-full bg-green-500 mr-2';
+            statusText.textContent = '已连接';
+            connectBtn.innerHTML = '<i class="fa fa-unplug mr-1"></i>断开';
+            connectBtn.classList.remove('bg-primary');
+            connectBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+            sendBtn.disabled = false;
+            sendBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            sendBtn.classList.add('bg-primary', 'hover:bg-primary/90', 'text-white');
         } else {
-            connectionStatus.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-gray-400 mr-2"></span>未连接';
-            connectBtn.classList.remove('hidden');
-            disconnectBtn.classList.add('hidden');
-            wsUrlInput.disabled = false;
-            myIdInput.disabled = false;
+            statusIndicator.className = 'w-3 h-3 rounded-full bg-red-500 mr-2';
+            statusText.textContent = '未连接';
+            connectBtn.innerHTML = '<i class="fa fa-plug mr-1"></i>连接';
+            connectBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            connectBtn.classList.add('bg-primary', 'hover:bg-primary/90');
+            sendBtn.disabled = true;
+            sendBtn.classList.remove('bg-primary', 'hover:bg-primary/90', 'text-white');
+            sendBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
         }
     }
 
-    // 页面加载时生成一个随机ID作为示例
-    window.addEventListener('load', () => {
-        if (!myIdInput.value) {
-            // 生成一个随机ID作为示例
-            myIdInput.value = 'user_' + Math.random().toString(36).substring(2, 10);
+    // 开始自动发送心跳
+    function startAutoHeartbeat() {
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
         }
+
+        // 每30秒发送一次心跳
+        heartbeatInterval = setInterval(() => {
+            if (isConnected) {
+                const originalType = currentMessageType;
+                currentMessageType = 'heartbeat';
+                sendMessage();
+                currentMessageType = originalType;
+            }
+        }, 30000);
+
+        addLog('系统', '已启动自动心跳 (30秒间隔)', 'info');
+    }
+
+    // 停止自动发送心跳
+    function stopAutoHeartbeat() {
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+            addLog('系统', '已停止自动心跳', 'info');
+        }
+    }
+
+    // 切换自动心跳
+    function toggleAutoHeartbeat() {
+        if (autoHeartbeatCheckbox.checked && isConnected) {
+            startAutoHeartbeat();
+        } else {
+            stopAutoHeartbeat();
+        }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        initEventListeners();
+        setMessageType('text');
     });
 </script>
 </body>
