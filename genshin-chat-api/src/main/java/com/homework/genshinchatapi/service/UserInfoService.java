@@ -17,4 +17,9 @@ public interface UserInfoService extends IService<UserInfo> {
     boolean saveUserInfo(UserInfo userInfo);
 
     UserInfo findid(String id);
+
+    String quickLogin();
+
+    Integer getTotalPeople();
+
 }

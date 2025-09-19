@@ -201,4 +201,22 @@ public class UserController {
         log.info("退出登录");
         return R.success(1);
     }
+
+
+    /**
+     * 快速登录
+     *
+     * @return {@link R }<{@link String }>
+     */
+    @PostMapping("/quick/login")
+    public R<String> quickLogin(){
+        String token = userInfoService.quickLogin();
+        return R.success(token);
+    }
+
+    @PostMapping("/getTotalPeople")
+    public R<Integer> getTotalPeople(){
+        Integer people =  userInfoService.getTotalPeople();
+        return R.success(people);
+    }
 }
