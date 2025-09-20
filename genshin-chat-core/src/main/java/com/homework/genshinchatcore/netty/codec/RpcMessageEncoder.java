@@ -1,4 +1,4 @@
-package com.homework.chatserver.netty.codec;
+package com.homework.genshinchatcore.netty.codec;
 
 import com.homework.common.entity.constants.RpcConstants;
 import com.homework.common.entity.enums.CompressTypeEnum;

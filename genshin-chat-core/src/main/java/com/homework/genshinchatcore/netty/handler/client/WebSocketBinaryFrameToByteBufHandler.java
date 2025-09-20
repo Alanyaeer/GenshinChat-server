@@ -1,4 +1,4 @@
-package com.homework.chatserver.netty.handler.client;
+package com.homework.genshinchatcore.netty.handler.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

@@ -5,12 +5,12 @@ import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.TextMessage;
-import com.homework.genshinchatclient.netty.codec.RpcMessageDecoder;
-import com.homework.genshinchatclient.netty.codec.RpcMessageEncoder;
-import com.homework.genshinchatclient.netty.handler.client.ClientRpcInboundMessageHandler;
-import com.homework.genshinchatclient.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
+import com.homework.genshinchatcore.netty.codec.RpcMessageDecoder;
+import com.homework.genshinchatcore.netty.codec.RpcMessageEncoder;
 import com.homework.genshinchatcore.context.SpringContextHolder;
 import com.homework.genshinchatcore.idGenerator.IdGenerator;
+import com.homework.genshinchatcore.netty.handler.client.ClientRpcInboundMessageHandler;
+import com.homework.genshinchatcore.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -31,8 +31,9 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
-import static com.homework.genshinchatclient.netty.NettyChannelHandlerInitializer.MAX_HTTP_CONTENT_LENGTH;
-import static com.homework.genshinchatclient.netty.NettyChannelHandlerInitializer.MAX_WEBSOCKET_CONTENT_LENGTH;
+import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.MAX_HTTP_CONTENT_LENGTH;
+import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.MAX_WEBSOCKET_CONTENT_LENGTH;
+
 
 /**
  * @author 嘉豪舞团-吴嘉豪

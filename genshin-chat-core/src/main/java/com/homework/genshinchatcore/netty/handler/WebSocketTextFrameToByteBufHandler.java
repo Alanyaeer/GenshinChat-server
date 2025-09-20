@@ -1,4 +1,4 @@
-package com.homework.chatserver.netty.handler;
+package com.homework.genshinchatcore.netty.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class WebSocketTextFrameToByteBufHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
     @Override

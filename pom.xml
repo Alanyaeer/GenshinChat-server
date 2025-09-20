@@ -28,6 +28,7 @@
         <protostuff.version>1.7.2</protostuff.version>
         <kryo.version>4.0.2</kryo.version>
         <guava.version>33.4.8-jre</guava.version>
+        <msgpack.version>0.9.6</msgpack.version>
     </properties>
 
     <modules>

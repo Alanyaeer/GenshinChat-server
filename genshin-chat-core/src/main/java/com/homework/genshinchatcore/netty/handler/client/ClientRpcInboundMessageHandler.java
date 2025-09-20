@@ -1,4 +1,4 @@
-package com.homework.genshinchatclient.netty.handler.client;
+package com.homework.genshinchatcore.netty.handler.client;
 
 import com.homework.common.entity.rpc.message.BaseMessage;
 import com.homework.common.entity.rpc.message.TextMessage;

@@ -1,4 +1,4 @@
-package com.homework.genshinchatclient.netty.handler;
+package com.homework.genshinchatcore.netty.handler;
 
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;

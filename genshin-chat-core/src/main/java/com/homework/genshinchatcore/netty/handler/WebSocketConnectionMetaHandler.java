@@ -1,4 +1,4 @@
-package com.homework.chatserver.netty.handler;
+package com.homework.genshinchatcore.netty.handler;
 
 import com.homework.common.entity.rpc.message.PingMessage;
 import com.homework.genshinchatcore.netty.channel.ChannelContext;

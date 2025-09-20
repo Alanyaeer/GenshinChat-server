@@ -1,4 +1,4 @@
-package com.homework.chatserver.netty.handler;
+package com.homework.genshinchatcore.netty.handler;
 
 import com.homework.common.entity.rpc.message.BaseMessage;
 import com.homework.common.entity.rpc.message.TextMessage;
@@ -8,7 +8,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**

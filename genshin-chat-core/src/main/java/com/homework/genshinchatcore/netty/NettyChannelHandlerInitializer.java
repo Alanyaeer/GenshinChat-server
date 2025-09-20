@@ -1,9 +1,9 @@
-package com.homework.genshinchatclient.netty;
+package com.homework.genshinchatcore.netty;
 
-import com.homework.genshinchatclient.netty.codec.RpcMessageDecoder;
-import com.homework.genshinchatclient.netty.codec.RpcMessageEncoder;
-import com.homework.genshinchatclient.netty.handler.*;
-import com.homework.genshinchatclient.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
+import com.homework.genshinchatcore.netty.handler.*;
+import com.homework.genshinchatcore.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
+import com.homework.genshinchatcore.netty.codec.RpcMessageDecoder;
+import com.homework.genshinchatcore.netty.codec.RpcMessageEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -46,6 +46,7 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 .addLast(new WebSocketTextFrameToByteBufHandler())
                 .addLast(new RpcMessageEncoder())
                 .addLast(new RpcMessageDecoder())
+                .addLast(eventExecutors, new RpcMessageHandler())
                 .addLast(eventExecutors, new TextWebSocketHandler())
                 .addLast(eventExecutors, new BinaryWebSocketHandler())
                 ;
