@@ -24,10 +24,10 @@ public class BaseMessage implements Message, Serializable {
     @Override
     public void fillHeaderFields(Message message) {
         if (message instanceof BaseMessage baseMessage) {
-            baseMessage.setCodecType(this.codecType);
-            baseMessage.setMessageType(this.messageType);
-            baseMessage.setCompressType(this.compressType);
-            baseMessage.setId(this.id);
+            this.codecType = baseMessage.codecType;
+            this.messageType = baseMessage.messageType;
+            this.compressType = baseMessage.compressType;
+//            this.id = baseMessage.id;
         }
     }
 

@@ -9,6 +9,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @SuperBuilder
+@NoArgsConstructor
 @AllArgsConstructor
 public class MediaMessage extends BaseMessage implements Serializable {
     private String url;

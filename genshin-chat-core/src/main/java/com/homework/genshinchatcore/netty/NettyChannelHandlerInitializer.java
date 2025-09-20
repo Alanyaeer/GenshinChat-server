@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -38,8 +39,6 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpObjectAggregator(MAX_HTTP_CONTENT_LENGTH))
                 .addLast(new WebSocketFrameAggregator(MAX_WEBSOCKET_CONTENT_LENGTH))
-                // 压缩，暂时不需要, 后面看一下怎么用
-//                .addLast(new WebSocketServerCompressionHandler(0))
                 .addLast(new WebSocketServerProtocolHandler("/v2/im/server", null, true, MAX_WEBSOCKET_CONTENT_LENGTH, false, true))
                 .addLast(new WebSocketConnectionMetaHandler())
                 .addLast(new WebSocketBinaryFrameToByteBufHandler())
@@ -47,8 +46,6 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 .addLast(new RpcMessageEncoder())
                 .addLast(new RpcMessageDecoder())
                 .addLast(eventExecutors, new RpcMessageHandler())
-                .addLast(eventExecutors, new TextWebSocketHandler())
-                .addLast(eventExecutors, new BinaryWebSocketHandler())
                 ;
     }
 }

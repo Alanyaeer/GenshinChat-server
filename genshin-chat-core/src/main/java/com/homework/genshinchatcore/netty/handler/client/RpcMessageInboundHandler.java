@@ -7,7 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ClientRpcInboundMessageHandler extends SimpleChannelInboundHandler<BaseMessage> {
+public class RpcMessageInboundHandler extends SimpleChannelInboundHandler<BaseMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BaseMessage msg) throws Exception {
         if(msg instanceof TextMessage textMessage){

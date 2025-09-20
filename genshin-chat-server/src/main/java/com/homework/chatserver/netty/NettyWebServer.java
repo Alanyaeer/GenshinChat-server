@@ -50,7 +50,6 @@ public class NettyWebServer implements CommandLineRunner {
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new NettyChannelHandlerInitializer(eventExecutors));
             ChannelFuture channelFuture = serverBootstrap.bind(PORT).sync();
-//            nettyWebClient.startConnect("333");
             channelFuture.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();

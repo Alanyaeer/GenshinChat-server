@@ -9,7 +9,7 @@ import com.homework.genshinchatcore.netty.codec.RpcMessageDecoder;
 import com.homework.genshinchatcore.netty.codec.RpcMessageEncoder;
 import com.homework.genshinchatcore.context.SpringContextHolder;
 import com.homework.genshinchatcore.idGenerator.IdGenerator;
-import com.homework.genshinchatcore.netty.handler.client.ClientRpcInboundMessageHandler;
+import com.homework.genshinchatcore.netty.handler.client.RpcMessageInboundHandler;
 import com.homework.genshinchatcore.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -55,7 +56,6 @@ public class NettyWebClient implements CommandLineRunner {
             Bootstrap bootstrap = new Bootstrap()
                     .group(workGroup)
                     .channel(NioSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.DEBUG))
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
@@ -64,11 +64,13 @@ public class NettyWebClient implements CommandLineRunner {
                                     .addLast(new ChunkedWriteHandler())
                                     .addLast(new HttpObjectAggregator(MAX_HTTP_CONTENT_LENGTH))
                                     .addLast(new WebSocketFrameAggregator(MAX_WEBSOCKET_CONTENT_LENGTH))
+//                                    .addLast(new WebSocketClientCompressionHandler(MAX_HTTP_CONTENT_LENGTH))
                                     .addLast(new WebSocketClientHandler(handshaker))
+                                    .addLast(new LoggingHandler(LogLevel.INFO))
                                     .addLast(new WebSocketBinaryFrameToByteBufHandler())
                                     .addLast(new RpcMessageDecoder())
                                     .addLast(new RpcMessageEncoder())
-                                    .addLast(new ClientRpcInboundMessageHandler())
+                                    .addLast(new RpcMessageInboundHandler())
                             ;
                         }
                     });
@@ -84,10 +86,10 @@ public class NettyWebClient implements CommandLineRunner {
                     .userId(userId)
                     .toUserId(-1L)
                     .compressType(CompressTypeEnum.NONE.getCode())
-                    .codecType(SerializationTypeEnum.PROTOSTUFF.getCode())
+                    .codecType(SerializationTypeEnum.KRYO.getCode())
                     .messageType(MessageTypeEnum.TEXT.getCode())
+                    .id(snowFlakeIdGenerator.nextId())
                     .build();
-            log.info(textMessage.toString());
             while(true){
                 channel.writeAndFlush(textMessage);
                 textMessage.setText(String.valueOf(++messageContent));

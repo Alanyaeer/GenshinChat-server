@@ -10,7 +10,7 @@ import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class BinaryWebSocketHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
+public class WebSocketImageTestHandler extends SimpleChannelInboundHandler<BinaryWebSocketFrame> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg) throws Exception {
         log.info("BinaryWebSocketFrame received: {}", msg);

@@ -9,7 +9,6 @@ import java.io.Serializable;
 
 @SuperBuilder
 @NoArgsConstructor
-
 public class PongMessage extends BaseMessage implements Serializable {
     // 禁止修改消息类型
     @Override

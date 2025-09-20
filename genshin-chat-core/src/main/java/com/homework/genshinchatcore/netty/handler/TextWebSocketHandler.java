@@ -17,6 +17,7 @@ public class TextWebSocketHandler extends SimpleChannelInboundHandler<TextWebSoc
         TextMessageBO textMessageBO = GsonUtils.fromJson(message, TextMessageBO.class);
         Channel channel = ChannelContext.select().getChannel(textMessageBO.getTo());
         channel.writeAndFlush(new TextWebSocketFrame(textMessageBO.getText()));
+//        msg.retain();
     }
 
     @Override

@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum SerializationTypeEnum {
     JSON((byte) 0x00, "jsonSerialization"),
-    KYRO((byte) 0x01, "kyroSerialization"),
+    KRYO((byte) 0x01, "kryoSerialization"),
     PROTOSTUFF((byte) 0x02, "protostuffSerialization"),
     HESSIAN((byte) 0x03, "hessianSerialization"),
     HESSIAN2((byte) 0x04, "hessian2Serialization"),
