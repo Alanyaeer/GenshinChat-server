@@ -32,6 +32,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -111,16 +112,29 @@ public class NettyWebClient implements CommandLineRunner {
                         .build();
                 channel.writeAndFlush(textMessage);
                 log.info("发送消息成功, 消息内容为：{}", textMessage.getId());
+//                    else{
+//                        log.info("已经成功接收到消息{}，暂停重新发送", textMessage.getId());
+//                        timeWheelManager.removeTask(textMessage.getId());
+//                        return false;
+//                    }
+//                }
                 // 测试 1ms
-                timeWheelManager.addTask(textMessage.getId(), textMessage, () -> {
-                    AckMessageManager ackMessageManager = SpringContextHolder.getBean(AckMessageManager.class);
-                    boolean isAck = ackMessageManager.containAckMessage(textMessage.getId());
-                    if(!isAck){
+                timeWheelManager.addTask(textMessage.getId(), textMessage, new TimeWheelManager.TaskExecutor() {
+                    @Override
+                    public boolean isNeedExecuteTask() {
+                        AckMessageManager ackMessageManager = SpringContextHolder.getBean(AckMessageManager.class);
+                        return !ackMessageManager.containAckMessage(textMessage.getId());
+                    }
+
+                    @Override
+                    public boolean isNeedSetNextTimerTask() {
+                        return true;
+                    }
+
+                    @Override
+                    public void doExecuteTask() {
                         channel.writeAndFlush(textMessage);
                         log.info("没有收到ACK，重新发送消息成功, 消息内容为：{}", textMessage.getId());
-                    }
-                    else{
-                        log.info("已经成功接收到消息{}，暂停重新发送", textMessage.getId());
                     }
                 }, 5, TimeUnit.MILLISECONDS);
 
