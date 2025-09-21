@@ -4,21 +4,18 @@ import com.homework.common.entity.enums.MessageTypeEnum;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-
+/**
+ * @author 嘉豪舞团-吴嘉豪
+ * @date 2025/9/21
+ */
 @Getter
 @Setter
 @SuperBuilder
-@AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-public class TextMessage extends BaseMessage implements Serializable {
-    private String text;
-    private Long userId;
-    private Long toUserId;
-
+public class DeliverAckMessage extends BaseMessage{
     @Override
     public final byte getMessageType() {
-        return MessageTypeEnum.TEXT.getCode();
+        return MessageTypeEnum.DELIVER_ACK.getCode();
     }
 }

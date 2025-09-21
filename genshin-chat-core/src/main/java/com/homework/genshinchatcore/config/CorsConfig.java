@@ -1,4 +1,4 @@
-package com.homework.genshinchatapi.config;
+package com.homework.genshinchatcore.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

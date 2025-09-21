@@ -5,12 +5,15 @@ import com.homework.common.entity.enums.CompressTypeEnum;
 import com.homework.common.entity.enums.MessageTypeEnum;
 import com.homework.common.entity.enums.SerializationTypeEnum;
 import com.homework.common.entity.rpc.message.TextMessage;
+import com.homework.common.utils.timewheel.TimeWheelManager;
 import com.homework.genshinchatcore.netty.codec.RpcMessageDecoder;
 import com.homework.genshinchatcore.netty.codec.RpcMessageEncoder;
 import com.homework.genshinchatcore.context.SpringContextHolder;
 import com.homework.genshinchatcore.idGenerator.IdGenerator;
-import com.homework.genshinchatcore.netty.handler.client.RpcMessageInboundHandler;
+import com.homework.genshinchatcore.netty.handler.ack.AckMessageManager;
+import com.homework.genshinchatcore.netty.handler.client.RpcMessageClientHandler;
 import com.homework.genshinchatcore.netty.handler.client.WebSocketBinaryFrameToByteBufHandler;
+import com.homework.genshinchatcore.netty.handler.client.WebSocketClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -21,16 +24,21 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.MAX_HTTP_CONTENT_LENGTH;
 import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.MAX_WEBSOCKET_CONTENT_LENGTH;
@@ -43,6 +51,14 @@ import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.
 @Component
 @Slf4j
 public class NettyWebClient implements CommandLineRunner {
+
+
+    private static final HashedWheelTimer HASHED_WHEEL_TIMER = new HashedWheelTimer(
+            r -> new Thread(r, "netty-web-client-resend-msg-thread"),
+            100,
+            TimeUnit.MILLISECONDS,
+            512,
+            true);
     @SneakyThrows
     public void startConnect(){
         IdGenerator snowFlakeIdGenerator = SpringContextHolder.getBean("snowFlakeIdGenerator", IdGenerator.class);
@@ -64,13 +80,12 @@ public class NettyWebClient implements CommandLineRunner {
                                     .addLast(new ChunkedWriteHandler())
                                     .addLast(new HttpObjectAggregator(MAX_HTTP_CONTENT_LENGTH))
                                     .addLast(new WebSocketFrameAggregator(MAX_WEBSOCKET_CONTENT_LENGTH))
-//                                    .addLast(new WebSocketClientCompressionHandler(MAX_HTTP_CONTENT_LENGTH))
                                     .addLast(new WebSocketClientHandler(handshaker))
-                                    .addLast(new LoggingHandler(LogLevel.INFO))
+//                                    .addLast(new LoggingHandler(LogLevel.INFO))
                                     .addLast(new WebSocketBinaryFrameToByteBufHandler())
                                     .addLast(new RpcMessageDecoder())
                                     .addLast(new RpcMessageEncoder())
-                                    .addLast(new RpcMessageInboundHandler())
+                                    .addLast(new RpcMessageClientHandler())
                             ;
                         }
                     });
@@ -81,20 +96,37 @@ public class NettyWebClient implements CommandLineRunner {
             WebSocketClientHandler handler = channel.pipeline().get(WebSocketClientHandler.class);
             handler.handshakeFuture().sync();
             int messageContent = 0;
-            TextMessage textMessage = TextMessage.builder()
-                    .text(String.valueOf(messageContent))
-                    .userId(userId)
-                    .toUserId(-1L)
-                    .compressType(CompressTypeEnum.NONE.getCode())
-                    .codecType(SerializationTypeEnum.KRYO.getCode())
-                    .messageType(MessageTypeEnum.TEXT.getCode())
-                    .id(snowFlakeIdGenerator.nextId())
-                    .build();
-            while(true){
-                channel.writeAndFlush(textMessage);
-                textMessage.setText(String.valueOf(++messageContent));
-                Thread.sleep(5000);
 
+            // 每隔一段时间发送一条消息
+            TimeWheelManager timeWheelManager = TimeWheelManager.getInstance();
+            while(true){
+                TextMessage textMessage = TextMessage.builder()
+                        .text(String.valueOf(messageContent))
+                        .userId(userId)
+                        .toUserId(-1L)
+                        .compressType(CompressTypeEnum.NONE.getCode())
+                        .codecType(SerializationTypeEnum.KRYO.getCode())
+                        .messageType(MessageTypeEnum.TEXT.getCode())
+                        .id(snowFlakeIdGenerator.nextId())
+                        .build();
+                channel.writeAndFlush(textMessage);
+                log.info("发送消息成功, 消息内容为：{}", textMessage.getId());
+                // 测试 1ms
+                timeWheelManager.addTask(textMessage.getId(), textMessage, () -> {
+                    AckMessageManager ackMessageManager = SpringContextHolder.getBean(AckMessageManager.class);
+                    boolean isAck = ackMessageManager.containAckMessage(textMessage.getId());
+                    if(!isAck){
+                        channel.writeAndFlush(textMessage);
+                        log.info("没有收到ACK，重新发送消息成功, 消息内容为：{}", textMessage.getId());
+                    }
+                    else{
+                        log.info("已经成功接收到消息{}，暂停重新发送", textMessage.getId());
+                    }
+                }, 5, TimeUnit.MILLISECONDS);
+
+                // 实际上 5s 10s 20s 40 超过一分钟没有接收到判定本次消息没有发送成功
+                messageContent++;
+                Thread.sleep(50000);
             }
         } finally {
             workGroup.shutdownGracefully();
@@ -106,69 +138,5 @@ public class NettyWebClient implements CommandLineRunner {
         new Thread(()-> {
             startConnect();
         }).start();
-    }
-
-    public static class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
-
-        private final WebSocketClientHandshaker handshaker;
-        private ChannelPromise handshakeFuture;
-
-        public WebSocketClientHandler(WebSocketClientHandshaker handshaker) {
-            this.handshaker = handshaker;
-        }
-
-        public ChannelFuture handshakeFuture() {
-            return handshakeFuture;
-        }
-
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) {
-            handshakeFuture = ctx.newPromise();
-        }
-
-        @Override
-        public void channelActive(ChannelHandlerContext ctx) {
-            // 连接成功时发起握手
-            handshaker.handshake(ctx.channel());
-        }
-
-        @Override
-        public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-            Channel ch = ctx.channel();
-            if (!handshaker.isHandshakeComplete()) {
-                // 处理握手响应
-                try {
-                    handshaker.finishHandshake(ch, (FullHttpResponse) msg);
-                    handshakeFuture.setSuccess();
-                    log.info("WebSocket 握手成功!");
-                } catch (WebSocketHandshakeException e) {
-                    handshakeFuture.setFailure(e);
-                    log.info("WebSocket 握手失败!");
-                }
-                return;
-            }
-
-            // 握手完成后，处理 WebSocket 帧
-            if (msg instanceof TextWebSocketFrame) {
-                log.info("收到消息: " + ((TextWebSocketFrame) msg).text());
-            } else if (msg instanceof PongWebSocketFrame) {
-                log.info("收到 Pong");
-            } else if (msg instanceof CloseWebSocketFrame) {
-                log.info("连接关闭");
-                ch.close();
-            }
-            else if(msg instanceof BinaryWebSocketFrame binaryWebSocketFrame){
-                ctx.fireChannelRead(binaryWebSocketFrame.retain());
-            }
-        }
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            cause.printStackTrace();
-            if (!handshakeFuture.isDone()) {
-                handshakeFuture.setFailure(cause);
-            }
-            ctx.close();
-        }
     }
 }

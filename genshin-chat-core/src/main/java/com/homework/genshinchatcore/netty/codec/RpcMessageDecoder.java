@@ -73,7 +73,6 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         byte codecType = in.readByte();
         byte compressType = in.readByte();
         long requestId = in.readLong();
-        // todo 消息幂等判断
         BaseMessage message = BaseMessage.builder()
                 .messageType(messageType)
                 .compressType(compressType)
@@ -92,22 +91,20 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
             String compressName = CompressTypeEnum.fromCode(compressType).getName();
             Compress compress = SpringContextHolder.getBean(compressName, Compress.class);
             byte[] decompressBytes = compress.decompress(bodyBytes);
+
             // 反序列化
-            String serializationName = SerializationTypeEnum.getName(codecType);
-            Serialization serialization = SpringContextHolder.getBean(serializationName, Serialization.class);
-
-            if (messageType == MessageTypeEnum.TEXT.getCode()) {
-                TextMessage textMessage = serialization.deserialize(decompressBytes, TextMessage.class);
-                textMessage.fillHeaderFields(message);
-                return textMessage;
-            } else if (messageType == MessageTypeEnum.MEDIA.getCode()) {
-                MediaMessage mediaMessage = serialization.deserialize(decompressBytes, MediaMessage.class);
-                mediaMessage.fillHeaderFields(message);
-                return mediaMessage;
-            }
-
+            return deserializeMessage(MessageTypeEnum.fromCode(messageType), message, decompressBytes);
         }
         throw new RuntimeException("未知消息类型" + messageType);
+    }
+
+    private BaseMessage deserializeMessage(MessageTypeEnum messageTypeEnum, BaseMessage headFieldMessage, byte[] decompressBytes) {
+        byte codecType = headFieldMessage.getCodecType();
+        String serializationName = SerializationTypeEnum.getName(codecType);
+        Serialization serialization = SpringContextHolder.getBean(serializationName, Serialization.class);
+        BaseMessage baseMessage = serialization.deserialize(decompressBytes, messageTypeEnum.getMessageClazz());
+        baseMessage.fillHeaderFields(headFieldMessage);
+        return baseMessage;
     }
 
     private void checkVersion(ByteBuf in) {
@@ -127,7 +124,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         }
     }
 
-    public boolean isHeartbeatMessage(byte messageType){
+    public boolean isHeartbeatMessage(byte messageType) {
         return messageType == MessageTypeEnum.PING.getCode() || messageType == MessageTypeEnum.PONG.getCode();
     }
 }

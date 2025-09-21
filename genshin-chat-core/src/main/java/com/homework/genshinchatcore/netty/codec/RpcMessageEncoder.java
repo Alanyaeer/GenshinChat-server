@@ -43,7 +43,6 @@ public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
     @Override
     protected void encode(ChannelHandlerContext ctx, BaseMessage message, List<Object> out) throws Exception {
         try {
-            IdGenerator idGenerator = SpringContextHolder.getBean(ID_GENERATOR_VERSION.getName(), IdGenerator.class);
             ByteBuf byteBuf = ctx.alloc().buffer();
             byteBuf.writeBytes(RpcConstants.MAGIC_NUMBER);
             byteBuf.writeByte(RpcConstants.VERSION);
@@ -52,8 +51,7 @@ public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
             byteBuf.writeByte(message.getMessageType());
             byteBuf.writeByte(message.getCodecType());
             byteBuf.writeByte(message.getCompressType());
-            long nextId = idGenerator.nextId();
-            byteBuf.writeLong(nextId);
+            byteBuf.writeLong(message.getId());
             int fullLength = RpcConstants.HEAD_LENGTH;
             if(!message.isHeartbeatMessage()){
                 // 序列化

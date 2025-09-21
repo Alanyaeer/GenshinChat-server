@@ -1,4 +1,4 @@
-package com.homework.genshinchatapi.config;
+package com.homework.genshinchatcore.config;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;

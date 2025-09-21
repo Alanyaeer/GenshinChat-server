@@ -1,4 +1,4 @@
-package com.homework.genshinchatapi.config;
+package com.homework.genshinchatcore.config;
 
 
 import com.esotericsoftware.kryo.Kryo;
@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -28,11 +29,12 @@ public class RedisConfig {
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
 
-        // 值（Value）使用Kryo序列化器
-        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        redisTemplate.setValueSerializer(stringRedisSerializer);
-        redisTemplate.setHashValueSerializer(stringRedisSerializer);
+        // 简单配置Jackson序列化器
+        Jackson2JsonRedisSerializer<Object> jsonSerializer =
+                new Jackson2JsonRedisSerializer<>(Object.class);
 
+        redisTemplate.setValueSerializer(jsonSerializer);
+        redisTemplate.setHashValueSerializer(jsonSerializer);
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }

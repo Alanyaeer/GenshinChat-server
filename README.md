@@ -5,7 +5,7 @@
 
 ---
 ## ✈️ 前端地址
-[https://github.com/Alanyaeer/GenshinChat-client](https://github.com/Alanyaeer/GenshinChat-client)
+[https://github.com/Alanyaeer/GenshinChat-client](https://github.com/Alanyaeer/GenshinChat-front)
 
 ---
 

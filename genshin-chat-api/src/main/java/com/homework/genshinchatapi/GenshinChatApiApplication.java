@@ -8,10 +8,15 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
 @Slf4j
 @SpringBootApplication
 @MapperScan("com.homework.genshinchatapi.mapper")
+@ComponentScan(basePackages = {
+        "com.homework.genshinchatapi",
+        "com.homework.genshinchatcore"
+})
 public class GenshinChatApiApplication {
 
     public static void main(String[] args) {

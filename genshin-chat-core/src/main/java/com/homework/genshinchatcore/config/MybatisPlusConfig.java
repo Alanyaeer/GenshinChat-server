@@ -1,4 +1,4 @@
-package com.homework.genshinchatapi.config;
+package com.homework.genshinchatcore.config;
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;

@@ -37,4 +37,5 @@ public class BaseMessage implements Message, Serializable {
         return this.messageType == MessageTypeEnum.PING.getCode()
                 || this.messageType == MessageTypeEnum.PONG.getCode();
     }
+
 }

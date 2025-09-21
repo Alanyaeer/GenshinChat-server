@@ -1,4 +1,4 @@
-package com.homework.genshinchatapi.config;
+package com.homework.genshinchatcore.config;
 
 import com.homework.common.common.R;
 import com.homework.common.exception.CustomException;

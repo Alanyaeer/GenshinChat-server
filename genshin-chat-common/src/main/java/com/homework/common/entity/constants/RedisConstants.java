@@ -14,6 +14,8 @@ public class RedisConstants {
     public static final String USER_INFO_KEY = "user:info";
     public static final Long USER_INFO_TTL = 60L;
     public static final String USER_COUNT = "user:count";
+    public static final String HAS_SENT_MESSAGE_ID = "has:send:message:id:%s";
+    public static final String ACK_MESSAGE_KEY = "ack:message:id:%s";
     public static Integer REDIS_EXPIRE_TIME=1;
     public static final String ID_GENERATOR_KEY = "id:generator";
     public static final String ID_GENERATOR_LONG_KEY = "id:generator:long";
