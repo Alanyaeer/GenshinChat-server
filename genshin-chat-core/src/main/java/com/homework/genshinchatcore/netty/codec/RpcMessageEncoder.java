@@ -20,18 +20,19 @@ import java.util.List;
 import static com.homework.common.entity.constants.RpcConstants.ID_GENERATOR_VERSION;
 
 /**
- <pre>
+ * <pre>
  *   0     1     2     3     4        5     6     7     8         9          10      11     12  13  14   15 16
  *   +-----+-----+-----+-----+--------+----+----+----+------+-----------+-------+----- --+-----+-----+-------+
- *   |   magic   code        |version | full length         | messageType| codec|compress|    RequestId       |
- *   +-----------------------+--------+---------------------+-----------+-----------+-----------+------------+
- *   |                                                                                                       |
- *   |                                         body                                                          |
- *   |                                                                                                       |
+ *   |   magic   code        |version | full length         | messageType| codec|compress|    RequestId
+ *   |    17     18    19   20
+ *   +----+-----------------+--------+---------------------+-----------+-----------+-----------+------------+
+ *                         |                                                                               |
+ *                         |                 body                                                          |
+ *   +----------------------+                                                                                |
  *   |                                        ... ...                                                        |
  *   +-------------------------------------------------------------------------------------------------------+
  * 4B  magic code（魔法数）   1B version（版本）   4B full length（消息长度）    1B messageType（消息类型）
- * 1B compress（压缩类型） 1B codec（序列化类型）    4B  requestId（请求的Id 经过hash操作的）
+ * 1B compress（压缩类型） 1B codec（序列化类型）    8B  requestId
  * body（object类型数据）
  * </pre>
  * @author 嘉豪舞团-吴嘉豪
@@ -51,9 +52,8 @@ public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
             byteBuf.writeByte(message.getMessageType());
             byteBuf.writeByte(message.getCodecType());
             byteBuf.writeByte(message.getCompressType());
-            // 使用murmurHash映射
             long nextId = idGenerator.nextId();
-            byteBuf.writeInt(MurMurHash.hashLong(nextId));
+            byteBuf.writeLong(nextId);
             int fullLength = RpcConstants.HEAD_LENGTH;
             if(!message.isHeartbeatMessage()){
                 // 序列化
@@ -81,4 +81,5 @@ public class RpcMessageEncoder extends MessageToMessageEncoder<BaseMessage> {
             ctx.fireExceptionCaught(e);
         }
     }
+
 }

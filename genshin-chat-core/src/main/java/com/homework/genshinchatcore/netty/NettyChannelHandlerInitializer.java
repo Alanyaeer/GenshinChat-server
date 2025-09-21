@@ -33,7 +33,6 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
     protected void initChannel(SocketChannel socketChannel) throws Exception {
 
         socketChannel.pipeline()
-                .addLast(new LoggingHandler(LogLevel.INFO))
                 .addLast(new IdleStateHandler(60, 0, 0, TimeUnit.SECONDS))
                 .addLast(new HttpServerCodec())
                 .addLast(new ChunkedWriteHandler())
@@ -42,7 +41,7 @@ public class NettyChannelHandlerInitializer extends ChannelInitializer<SocketCha
                 .addLast(new WebSocketServerProtocolHandler("/v2/im/server", null, true, MAX_WEBSOCKET_CONTENT_LENGTH, false, true))
                 .addLast(new WebSocketConnectionMetaHandler())
                 .addLast(new WebSocketBinaryFrameToByteBufHandler())
-                .addLast(new WebSocketTextFrameToByteBufHandler())
+                .addLast(new LoggingHandler(LogLevel.INFO))
                 .addLast(new RpcMessageEncoder())
                 .addLast(new RpcMessageDecoder())
                 .addLast(eventExecutors, new RpcMessageHandler())

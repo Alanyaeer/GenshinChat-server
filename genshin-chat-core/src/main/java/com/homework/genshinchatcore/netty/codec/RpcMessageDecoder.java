@@ -20,15 +20,16 @@ import java.util.Arrays;
  * <pre>
  *   0     1     2     3     4        5     6     7     8         9          10      11     12  13  14   15 16
  *   +-----+-----+-----+-----+--------+----+----+----+------+-----------+-------+----- --+-----+-----+-------+
- *   |   magic   code        |version | full length         | messageType| codec|compress|    RequestId       |
- *   +-----------------------+--------+---------------------+-----------+-----------+-----------+------------+
- *   |                                                                                                       |
- *   |                                         body                                                          |
- *   |                                                                                                       |
+ *   |   magic   code        |version | full length         | messageType| codec|compress|    RequestId
+ *   |    17     18    19   20
+ *   +----+-----------------+--------+---------------------+-----------+-----------+-----------+------------+
+ *                         |                                                                               |
+ *                         |                 body                                                          |
+ *   +----------------------+                                                                                |
  *   |                                        ... ...                                                        |
  *   +-------------------------------------------------------------------------------------------------------+
  * 4B  magic code（魔法数）   1B version（版本）   4B full length（消息长度）    1B messageType（消息类型）
- * 1B compress（压缩类型） 1B codec（序列化类型）    4B  requestId（请求的Id 经过hash操作的）
+ * 1B compress（压缩类型） 1B codec（序列化类型）    8B  requestId
  * body（object类型数据）
  * </pre>
  *
@@ -50,7 +51,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         Object decoded = super.decode(ctx, in);
         if (decoded instanceof ByteBuf frame) {
-            if (frame.readableBytes() >= RpcConstants.TOTAL_LENGTH) {
+            if (frame.readableBytes() >= RpcConstants.HEAD_LENGTH) {
                 try {
                     return decodeFrame(frame.retain());
                 } catch (Exception e) {
@@ -71,14 +72,8 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         byte messageType = in.readByte();
         byte codecType = in.readByte();
         byte compressType = in.readByte();
-        int requestId = in.readInt();
+        long requestId = in.readLong();
         // todo 消息幂等判断
-//        Message baseMessage = Message.builder()
-//                .messageValueType(messageType)
-//                .compressType(compressType)
-//                .codecType(codecType)
-//                .id(requestId)
-//                .build();
         BaseMessage message = BaseMessage.builder()
                 .messageType(messageType)
                 .compressType(compressType)

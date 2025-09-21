@@ -16,6 +16,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseMessage implements Message, Serializable {
+    // 为了减少内存占用，使用transient关键词，不序列化这些字段，因为都已经存在RpcMessage头部了
     private transient byte codecType;
     private transient byte messageType;
     private transient byte compressType;
@@ -27,7 +28,7 @@ public class BaseMessage implements Message, Serializable {
             this.codecType = baseMessage.codecType;
             this.messageType = baseMessage.messageType;
             this.compressType = baseMessage.compressType;
-//            this.id = baseMessage.id;
+            this.id = baseMessage.id;
         }
     }
 

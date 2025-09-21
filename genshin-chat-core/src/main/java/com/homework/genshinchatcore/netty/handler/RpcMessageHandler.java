@@ -25,7 +25,6 @@ public class RpcMessageHandler extends SimpleChannelInboundHandler<BaseMessage> 
             // toUser == -1
             if(toUserId == -1L){
                 Map<String, Channel> channelMap = ChannelContext.select().getChannelMap();
-                log.info("channels个数: {}", channelMap.size());
                 channelMap.forEach((k,v)->{
                     if(!k.equals(String.valueOf(textMessage.getUserId()))){
                         channelMap.get(k).writeAndFlush(textMessage);

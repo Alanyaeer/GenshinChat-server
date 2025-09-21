@@ -47,7 +47,7 @@ public class NettyWebServer implements CommandLineRunner {
                     // childOption 是配置子Channel的（客户端连接通道NioSocketChannel）
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY, true)
-                    .handler(new LoggingHandler(LogLevel.DEBUG))
+                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new NettyChannelHandlerInitializer(eventExecutors));
             ChannelFuture channelFuture = serverBootstrap.bind(PORT).sync();
             channelFuture.channel().closeFuture().sync();
