@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.MAX_HTTP_CONTENT_LENGTH;
 import static com.homework.genshinchatcore.netty.NettyChannelHandlerInitializer.MAX_WEBSOCKET_CONTENT_LENGTH;
@@ -100,6 +101,7 @@ public class NettyWebClient implements CommandLineRunner {
 
             // 每隔一段时间发送一条消息
             TimeWheelManager timeWheelManager = TimeWheelManager.getInstance();
+            AckMessageManager ackMessageManager = SpringContextHolder.getBean(AckMessageManager.class);
             while(true){
                 TextMessage textMessage = TextMessage.builder()
                         .text(String.valueOf(messageContent))
@@ -112,17 +114,11 @@ public class NettyWebClient implements CommandLineRunner {
                         .build();
                 channel.writeAndFlush(textMessage);
                 log.info("发送消息成功, 消息内容为：{}", textMessage.getId());
-//                    else{
-//                        log.info("已经成功接收到消息{}，暂停重新发送", textMessage.getId());
-//                        timeWheelManager.removeTask(textMessage.getId());
-//                        return false;
-//                    }
-//                }
                 // 测试 1ms
-                timeWheelManager.addTask(textMessage.getId(), textMessage, new TimeWheelManager.TaskExecutor() {
+                AtomicInteger retryCount = new AtomicInteger();
+                timeWheelManager.addTask(retryCount, new TimeWheelManager.TaskExecutor() {
                     @Override
                     public boolean isNeedExecuteTask() {
-                        AckMessageManager ackMessageManager = SpringContextHolder.getBean(AckMessageManager.class);
                         return !ackMessageManager.containAckMessage(textMessage.getId());
                     }
 
@@ -134,13 +130,13 @@ public class NettyWebClient implements CommandLineRunner {
                     @Override
                     public void doExecuteTask() {
                         channel.writeAndFlush(textMessage);
-                        log.info("没有收到ACK，重新发送消息成功, 消息内容为：{}", textMessage.getId());
+                        log.info("没有收到ACK，重新发送消息成功, 消息id：{}", textMessage.getId());
                     }
-                }, 5, TimeUnit.MILLISECONDS);
+                }, 5, TimeUnit.SECONDS);
 
                 // 实际上 5s 10s 20s 40 超过一分钟没有接收到判定本次消息没有发送成功
                 messageContent++;
-                Thread.sleep(50000);
+                Thread.sleep(5000);
             }
         } finally {
             workGroup.shutdownGracefully();
