@@ -18,7 +18,7 @@ public class RpcMessageClientHandler extends SimpleChannelInboundHandler<BaseMes
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BaseMessage msg) throws Exception {
         if(msg instanceof TextMessage textMessage){
-            log.info("接收到来自{}的消息，消息内容为{}", textMessage.getUserId(), textMessage.getText());
+            log.info("receive message which id: {} and content: {}", textMessage.getUserId(), textMessage.getText());
         }
         else if(msg instanceof ReceiveAckMessage receiveAckMessage){
             AckMessageManager ackMessageManager = SpringContextHolder.getBean(AckMessageManager.class);
@@ -26,7 +26,7 @@ public class RpcMessageClientHandler extends SimpleChannelInboundHandler<BaseMes
             log.info("[receive ack {}]", receiveAckMessage.getId());
         }
         else if(msg instanceof DeliverAckMessage deliverAckMessage){
-            log.info("消息id为{}已经被对方用户成功接受", deliverAckMessage.getId());
+            log.info("[deliver ack {}]", deliverAckMessage.getId());
         }
     }
 }
