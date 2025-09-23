@@ -50,11 +50,11 @@ public class TimeWheelManager {
      */
     private void executeTaskRecursive(AtomicInteger retryCount, TaskExecutor taskExecutor, long delay, TimeUnit unit){
         TimerTask timerTask = timeout -> {
-            boolean isTaskContinue = taskExecutor.execute();
-            if(isTaskContinue && retryCount.addAndGet(1) <= MAX_RETRY_TIMES){
+            taskExecutor.execute();
+            if(taskExecutor.shouldScheduleNext() && retryCount.addAndGet(1) <= MAX_RETRY_TIMES){
                 executeTaskRecursive(retryCount, taskExecutor, delayTimeStrategy.calculateNextDelayTime(delay), unit);
             }
-            else if(isTaskContinue && retryCount.get() > MAX_RETRY_TIMES){
+            else if(taskExecutor.shouldScheduleNext() && retryCount.get() > MAX_RETRY_TIMES){
                 taskExecutor.onMaxRetriesExceeded();
             }
         };
@@ -62,21 +62,19 @@ public class TimeWheelManager {
     }
 
     public abstract static class TaskExecutor {
-        protected boolean execute(){
-            boolean needExecuteTask = shouldNeedExecuteTask();
+        protected void execute(){
+            boolean needExecuteTask = shouldExecuteTask();
             if(needExecuteTask){
                 // 执行任务
                 doExecuteTask();
-                return shouldNeedSetNextTimerTask();
             }
             else{
                 onIgnored();
-                return false;
             }
         }
-        public abstract boolean shouldNeedExecuteTask();
+        public abstract boolean shouldExecuteTask();
 
-        public abstract boolean shouldNeedSetNextTimerTask();
+        public abstract boolean shouldScheduleNext();
 
         public abstract void doExecuteTask();
 

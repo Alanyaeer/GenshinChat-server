@@ -116,13 +116,13 @@ public class NettyWebClient implements CommandLineRunner {
                 log.info("发送消息成功, 消息内容为：{}", textMessage.getId());
                 timeWheelManager.addTask(new TimeWheelManager.TaskExecutor() {
                     @Override
-                    public boolean shouldNeedExecuteTask() {
+                    public boolean shouldExecuteTask() {
                         return !ackMessageManager.containAckMessage(textMessage.getId());
                     }
 
                     @Override
-                    public boolean shouldNeedSetNextTimerTask() {
-                        return true;
+                    public boolean shouldScheduleNext() {
+                        return shouldExecuteTask();
                     }
 
                     @Override
