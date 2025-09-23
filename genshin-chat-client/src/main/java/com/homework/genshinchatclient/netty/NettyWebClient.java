@@ -114,16 +114,14 @@ public class NettyWebClient implements CommandLineRunner {
                         .build();
                 channel.writeAndFlush(textMessage);
                 log.info("发送消息成功, 消息内容为：{}", textMessage.getId());
-                // 测试 1ms
-                AtomicInteger retryCount = new AtomicInteger();
-                timeWheelManager.addTask(retryCount, new TimeWheelManager.TaskExecutor() {
+                timeWheelManager.addTask(new TimeWheelManager.TaskExecutor() {
                     @Override
-                    public boolean isNeedExecuteTask() {
+                    public boolean shouldNeedExecuteTask() {
                         return !ackMessageManager.containAckMessage(textMessage.getId());
                     }
 
                     @Override
-                    public boolean isNeedSetNextTimerTask() {
+                    public boolean shouldNeedSetNextTimerTask() {
                         return true;
                     }
 

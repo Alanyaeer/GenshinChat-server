@@ -1,13 +1,10 @@
 package com.homework.common.utils.timewheel;
 
 import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,14 +35,27 @@ public class TimeWheelManager {
      * @param delay  延迟时间
      * @param unit   时间单位
      */
-    public <T> void addTask(AtomicInteger retryCount, TaskExecutor taskExecutor, long delay, TimeUnit unit) {
+    public void addTask(TaskExecutor taskExecutor, long delay, TimeUnit unit) {
+        AtomicInteger retryCount = new AtomicInteger();
+        executeTaskRecursive(retryCount, taskExecutor, delay, unit);
+    }
+
+    /**
+     * 执行任务递归，exponential 增长退避时长，直到超过3次
+     *
+     * @param retryCount   重试次数
+     * @param taskExecutor 任务执行者
+     * @param delay        延迟
+     * @param unit         单元
+     */
+    private void executeTaskRecursive(AtomicInteger retryCount, TaskExecutor taskExecutor, long delay, TimeUnit unit){
         TimerTask timerTask = timeout -> {
             boolean isTaskContinue = taskExecutor.execute();
             if(isTaskContinue && retryCount.addAndGet(1) <= MAX_RETRY_TIMES){
-                addTask(retryCount, taskExecutor, delayTimeStrategy.calculateNextDelayTime(delay), unit);
+                executeTaskRecursive(retryCount, taskExecutor, delayTimeStrategy.calculateNextDelayTime(delay), unit);
             }
             else if(isTaskContinue && retryCount.get() > MAX_RETRY_TIMES){
-                log.error("任务执行次数超过最大次数，任务被终止");
+                taskExecutor.onMaxRetriesExceeded();
             }
         };
         timer.newTimeout(timerTask, delay, unit);
@@ -53,25 +63,31 @@ public class TimeWheelManager {
 
     public abstract static class TaskExecutor {
         protected boolean execute(){
-            boolean needExecuteTask = isNeedExecuteTask();
+            boolean needExecuteTask = shouldNeedExecuteTask();
             if(needExecuteTask){
                 // 执行任务
                 doExecuteTask();
-                return isNeedSetNextTimerTask();
+                return shouldNeedSetNextTimerTask();
             }
             else{
-                doIgnoreExecuteTask();
+                onIgnored();
                 return false;
             }
         }
-        public abstract boolean isNeedExecuteTask();
+        public abstract boolean shouldNeedExecuteTask();
 
-        public abstract boolean isNeedSetNextTimerTask();
+        public abstract boolean shouldNeedSetNextTimerTask();
 
         public abstract void doExecuteTask();
 
-        public void doIgnoreExecuteTask(){
+        public void onIgnored(){
             log.info("任务被忽略");
+        }
+        /**
+         * 任务达到最大重试次数时的处理
+         */
+        public void onMaxRetriesExceeded() {
+            log.error("任务执行次数超过最大限制，任务终止");
         }
     }
 }
